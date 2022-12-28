@@ -149,10 +149,15 @@ class PhraseProviderTest extends TestCase
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
-            'download locale' => new MockResponse('', ['http_code' => 304, 'response_headers' => [
-                'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
-                'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
-            ]]),
+            'download locale' => function (string $method, string $url, array $options = []): ResponseInterface {
+                $this->assertSame('GET', $method);
+                $this->assertContains('If-None-Match: W/"625d11cf081b1697cbc216edf6ebb13c"', $options['headers']);
+
+                return new MockResponse('', ['http_code' => 304, 'response_headers' => [
+                    'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
+                    'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
+                ]]);
+            },
         ];
 
         $this->getLoader()
