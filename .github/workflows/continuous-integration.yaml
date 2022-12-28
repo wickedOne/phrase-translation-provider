@@ -1,0 +1,119 @@
+name: "continuous integration"
+
+on:
+  pull_request:
+  push:
+
+env:
+  MIN_MSI: 95.00
+  MIN_COVERED_MSI: 98.00
+
+jobs:
+  phpunit-tests:
+    name: "phpunit tests"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        dependencies:
+          - "lowest"
+          - "highest"
+          - "locked"
+        php-version:
+          - "8.1"
+          - "8.2"
+        operating-system:
+          - "ubuntu-latest"
+    steps:
+      - name: "checkout"
+        uses: "actions/checkout@v3"
+
+      - name: "install php"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "pcov"
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+          tools: composer:v2, cs2pr
+
+      - name: "install dependencies"
+        uses: "ramsey/composer-install@2.1.0"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+
+      - name: "tests"
+        run: "vendor/bin/phpunit --coverage-clover coverage.xml"
+
+      - name: "upload to codecov"
+        uses: codecov/codecov-action@v3
+
+  mutation-tests:
+    name: "mutation tests"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        dependencies:
+          - "locked"
+        php-version:
+          - "8.1"
+        operating-system:
+          - "ubuntu-latest"
+
+    steps:
+      - name: "checkout"
+        uses: "actions/checkout@v3"
+
+      - name: "install php"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "xdebug"
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1, zend.assertions=1
+
+      - name: "install dependencies"
+        uses: "ramsey/composer-install@2.1.0"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+
+      - name: "infection"
+        run: "./vendor/bin/infection -j$(nproc) --logger-github --min-msi=$MIN_MSI --min-covered-msi=$MIN_COVERED_MSI --test-framework-options='--testsuite=unit'"
+        env:
+          INFECTION_BADGE_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+
+  static-analysis-phpstan:
+    name: "static analysis phpstan"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        dependencies:
+          - "locked"
+        php-version:
+          - "8.1"
+          - "8.2"
+        operating-system:
+          - "ubuntu-latest"
+
+    steps:
+      - name: "checkout"
+        uses: "actions/checkout@v3"
+
+      - name: "install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+
+      - name: "install dependencies"
+        uses: "ramsey/composer-install@2.1.0"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+
+      - name: "phpstan"
+        run: "vendor/bin/phpstan analyse --memory-limit=-1"

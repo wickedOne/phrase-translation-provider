@@ -1,6 +1,17 @@
 # phrase-translation-provider
 symfony phrase translation provider bridge
 
+[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FwickedOne%2Fphrase-translation-provider%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/wickedOne/phrase-translation-provider/master)
+[![codecov](https://codecov.io/gh/wickedOne/phrase-translation-provider/branch/master/graph/badge.svg?token=UHKAVGURP7)](https://codecov.io/gh/wickedOne/phrase-translation-provider)
+
+[//]: # ([![Latest Stable Version]&#40;http://poser.pugx.org/wickedone/phrase-translation-provider/v&#41;]&#40;https://packagist.org/packages/wickedone/phrase-translation-provider&#41;)
+
+[//]: # ([![Total Downloads]&#40;http://poser.pugx.org/wickedone/phrase-translation-provider/downloads&#41;]&#40;https://packagist.org/packages/wickedone/phrase-translation-provider&#41;)
+
+[//]: # ([![License]&#40;http://poser.pugx.org/wickedone/phrase-translation-provider/license&#41;]&#40;https://packagist.org/packages/wickedone/phrase-translation-provider&#41;)
+
+[//]: # ([![PHP Version Require]&#40;http://poser.pugx.org/wickedone/phrase-translation-provider/require/php&#41;]&#40;https://packagist.org/packages/wickedone/phrase-translation-provider&#41;)
+
 ## dsn example
 ```dotenv
 PHRASE_DSN=phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject

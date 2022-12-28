@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /*
  * This file is part of the Phrase Symfony Translation Provider.
  * (c) wicliff <wicliff.wolda@gmail.com>
@@ -10,11 +8,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\Translation\Bridge\Phrase\Event;
+$file = __DIR__.'/../vendor/autoload.php';
 
-/**
- * @author wicliff <wicliff.wolda@gmail.com>
- */
-class PhraseWriteEvent extends AbstractPhraseEvent
-{
+if (!file_exists($file)) {
+    throw new RuntimeException('Install dependencies using composer to run the test suite.');
 }
+
+$autoload = require $file;
