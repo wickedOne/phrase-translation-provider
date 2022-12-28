@@ -8,6 +8,11 @@ symfony phrase translation provider bridge
 [![License](http://poser.pugx.org/wickedone/phrase-translation-provider/license)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 [![PHP Version Require](http://poser.pugx.org/wickedone/phrase-translation-provider/require/php)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 
+## installation
+```bash
+composer require wickedone/phrase-translation-provider
+```
+
 ## dsn example
 ```dotenv
 PHRASE_DSN=phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject
@@ -29,13 +34,13 @@ phrase is aware of this issue and is currently looking into that. until that's r
 ## service phrase provider
 in your `services.yaml` add the following to enable the phrase provider.
 ```yaml
-    Symfony\Component\Translation\Bridge\Phrase\PhraseProviderFactory:
-        tags: ['translation.provider_factory']
-        arguments:
-            $defaultLocale: '%kernel.default_locale%'
-            $loader: '@translation.loader.xliff'
-            $xliffFileDumper: '@translation.dumper.xliff'
-            $cache: '@cache.app'
+Symfony\Component\Translation\Bridge\Phrase\PhraseProviderFactory:
+    tags: ['translation.provider_factory']
+    arguments:
+        $defaultLocale: '%kernel.default_locale%'
+        $loader: '@translation.loader.xliff'
+        $xliffFileDumper: '@translation.dumper.xliff'
+        $cache: '@cache.app'
 ```
 and in your `translations.yaml` you can add:
 ```yaml
@@ -64,5 +69,6 @@ to enable you to perform post-processing on translation values and / or keys, tw
 
 ### PhraseReadEvent
 _after_ reading the catalogue from phrase, the resulting `TranslatorBag` is dispatched in a `PhraseReadEvent` prior to being returned from the read method. 
+
 ### PhraseWriteEvent
 _before_ writing the catalogue to phrase, the `TranslatorBag` is dispatched in a `PhraseWriteEvent`.
