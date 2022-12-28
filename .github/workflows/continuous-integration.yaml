@@ -3,6 +3,8 @@ name: "continuous integration"
 on:
   pull_request:
   push:
+    branches:
+      - master
 
 env:
   MIN_MSI: 95.00
