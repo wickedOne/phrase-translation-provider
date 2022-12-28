@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the Phrase Symfony Translation Provider.
+ * (c) wicliff <wicliff.wolda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\Translation\Bridge\Phrase;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -44,7 +52,7 @@ class PhraseProviderFactory extends AbstractProviderFactory
             'base_uri' => 'https://'.$endpoint.'/v2/projects/'.$this->getUser($dsn).'/',
             'headers' => [
                 'Authorization' => 'token '.$this->getPassword($dsn),
-                'User-Agent' => $dsn->getOption('userAgent'),
+                'User-Agent' => $dsn->getRequiredOption('userAgent'),
             ],
         ]);
 

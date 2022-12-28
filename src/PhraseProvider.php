@@ -2,8 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Symfony\Component\Translation\Bridge\Phrase;
+/*
+ * This file is part of the Phrase Symfony Translation Provider.
+ * (c) wicliff <wicliff.wolda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
+namespace Symfony\Component\Translation\Bridge\Phrase;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
@@ -14,6 +21,7 @@ use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseWriteEvent;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Exception\ProviderException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Component\Translation\TranslatorBagInterface;
@@ -25,6 +33,9 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 class PhraseProvider implements ProviderInterface
 {
+    /**
+     * @var array<string, string>
+     */
     private static array $phraseLocales = [];
 
     public function __construct(
@@ -38,6 +49,15 @@ class PhraseProvider implements ProviderInterface
     ) {
     }
 
+    public function __toString(): string
+    {
+        return sprintf('phrase://%s', $this->endpoint);
+    }
+
+    /**
+     * @param array<array-key, string> $domains
+     * @param array<array-key, string> $locales
+     */
     public function read(array $domains, array $locales): TranslatorBag
     {
         $translatorBag = new TranslatorBag();
@@ -46,7 +66,7 @@ class PhraseProvider implements ProviderInterface
             $phraseLocale = $this->getLocale($locale);
 
             foreach ($domains as $domain) {
-                $response = $this->httpClient->request('GET', 'locales/' . $phraseLocale . '/download', [
+                $response = $this->httpClient->request('GET', 'locales/'.$phraseLocale.'/download', [
                     'query' => [
                         'file_format' => 'symfony_xliff',
                         'tags' => $domain,
@@ -56,12 +76,12 @@ class PhraseProvider implements ProviderInterface
                 ]);
 
                 if (200 !== $statusCode = $response->getStatusCode()) {
-                    $this->logger->error(sprintf('Unable to get translations for locale %s from phrase: "%s".', $locale, $response->getContent(false)));
+                    $this->logger->error(sprintf('Unable to get translations for locale "%s" from phrase: "%s".', $locale, $response->getContent(false)));
 
                     $this->throwProviderException($statusCode, $response, 'Unable to get translations from phrase.');
                 }
 
-                $translatorBag->addCatalogue($this->loader->load($response->getContent(false), $locale, $domain));
+                $translatorBag->addCatalogue($this->loader->load($response->getContent(), $locale, $domain));
             }
         }
 
@@ -72,16 +92,19 @@ class PhraseProvider implements ProviderInterface
     }
 
     /**
-     * @inheritdoc
+     * @param \Symfony\Component\Translation\TranslatorBag $translatorBag
      */
     public function write(TranslatorBagInterface $translatorBag): void
     {
         $event = new PhraseWriteEvent($translatorBag);
         $this->dispatcher->dispatch($event);
 
-        foreach ($event->getBag()->getCatalogues() as $catalogue) {
+        /** @var MessageCatalogue[] $catalogues */
+        $catalogues = $event->getBag()->getCatalogues();
+
+        foreach ($catalogues as $catalogue) {
             foreach ($catalogue->getDomains() as $domain) {
-                if (0 === count($catalogue->all($domain))) {
+                if (0 === \count($catalogue->all($domain))) {
                     continue;
                 }
 
@@ -93,7 +116,6 @@ class PhraseProvider implements ProviderInterface
                 $fields = [
                     'file_format' => 'symfony_xliff',
                     'file' => new DataPart($content, $filename, 'application/xml'),
-                    'format_options' => ['enclose_in_cdata'],
                     'locale_id' => $phraseLocale,
                     'tags' => $domain,
                     'update_translations' => '1',
@@ -107,7 +129,7 @@ class PhraseProvider implements ProviderInterface
                 ]);
 
                 if (201 !== $statusCode = $response->getStatusCode()) {
-                    $this->logger->error(sprintf('Unable to upload translations for domain %s to phrase: "%s".', $domain, $response->getContent(false)));
+                    $this->logger->error(sprintf('Unable to upload translations for domain "%s" to phrase: "%s".', $domain, $response->getContent(false)));
 
                     $this->throwProviderException($statusCode, $response, 'Unable to upload translations to phrase.');
                 }
@@ -124,27 +146,27 @@ class PhraseProvider implements ProviderInterface
                 continue;
             }
 
-            $names = array_map(static fn ($v): string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
+            $names = array_map(static fn ($v): ?string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
 
             foreach ($names as $name) {
                 $response = $this->httpClient->request('DELETE', 'keys', [
                     'query' => [
-                        'q' => 'name:' . $name,
+                        'q' => 'name:'.$name,
                     ],
                 ]);
 
                 if (200 !== $statusCode = $response->getStatusCode()) {
-                    $this->logger->error(sprintf('Unable to delete keys %s in phrase: "%s".', implode(', ', $keys), $response->getContent(false)));
+                    $this->logger->error(sprintf('Unable to delete key "%s" in phrase: "%s".', $name, $response->getContent(false)));
 
-                    $this->throwProviderException($statusCode, $response, 'Unable to delete keys in phrase.');
+                    $this->throwProviderException($statusCode, $response, 'Unable to delete key in phrase.');
                 }
             }
         }
     }
 
-    public function __toString(): string
+    public static function resetPhraseLocales(): void
     {
-        return sprintf('phrase://%s', $this->endpoint);
+        self::$phraseLocales = [];
     }
 
     private function getLocale(string $locale): string
@@ -153,7 +175,7 @@ class PhraseProvider implements ProviderInterface
             $this->initLocales();
         }
 
-        if (!array_key_exists($locale, self::$phraseLocales)) {
+        if (!\array_key_exists($locale, self::$phraseLocales)) {
             $this->createLocale($locale);
         }
 
@@ -165,22 +187,22 @@ class PhraseProvider implements ProviderInterface
         $response = $this->httpClient->request('POST', 'locales', [
             'body' => [
                 'name' => $locale,
-                'code' => str_replace('_', '-', $locale),
+                'code' => $this->toPhraseLocale($locale),
             ],
             'headers' => [
-                'Content-Type' => 'application/json',
+                'Content-Type' => 'application/x-www-form-urlencoded',
             ],
         ]);
 
         if (201 !== $statusCode = $response->getStatusCode()) {
-            $this->logger->error(sprintf('Unable to create locale %s in phrase: "%s".', $locale, $response->getContent(false)));
+            $this->logger->error(sprintf('Unable to create locale "%s" in phrase: "%s".', $locale, $response->getContent(false)));
 
             $this->throwProviderException($statusCode, $response, 'Unable to create locale phrase.');
         }
 
-        $phraseLocale = $response->toArray(false);
+        $phraseLocale = $response->toArray();
 
-        self::$phraseLocales[str_replace('-', '_', $phraseLocale['code'])] = $phraseLocale['id'];
+        self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale['id'];
     }
 
     private function initLocales(): void
@@ -193,20 +215,32 @@ class PhraseProvider implements ProviderInterface
             $this->throwProviderException($statusCode, $response, 'Unable to get locales from phrase.');
         }
 
-        foreach ($response->toArray(false) as $phraseLocale) {
-            self::$phraseLocales[str_replace('-', '_', $phraseLocale['code'])] = $phraseLocale['id'];
+        foreach ($response->toArray() as $phraseLocale) {
+            self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale['id'];
         }
     }
 
     private function throwProviderException(int $statusCode, ResponseInterface $response, string $message): void
     {
-        throw match (true) {
-            $statusCode === 429 => new ProviderException(sprintf('Rate limit exceeded (%d). please wait %d seconds.',
-                $response->getHeaders()['X-Rate-Limit-Limit'],
-                $response->getHeaders()['X-Rate-Limit-Reset']
-            ), $response),
+        $headers = $response->getHeaders(false);
 
+        throw match (true) {
+            429 === $statusCode => new ProviderException(sprintf('Rate limit exceeded (%s). please wait %s seconds.',
+                $headers['x-rate-limit-limit'][0],
+                $headers['x-rate-limit-reset'][0]
+            ), $response),
             $statusCode <= 500 => new ProviderException($message, $response),
+            default => new ProviderException('Provider server error.', $response),
         };
+    }
+
+    private function toSymfonyLocale(string $locale): string
+    {
+        return str_replace('-', '_', $locale);
+    }
+
+    private function toPhraseLocale(string $locale): string
+    {
+        return str_replace('_', '-', $locale);
     }
 }

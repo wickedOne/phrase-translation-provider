@@ -2,30 +2,19 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the Phrase Symfony Translation Provider.
+ * (c) wicliff <wicliff.wolda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\Component\Translation\Bridge\Phrase\Event;
-
-
-use Symfony\Component\Translation\MessageCatalogue;
-use Symfony\Component\Translation\TranslatorBag;
-use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @author wicliff <wicliff.wolda@gmail.com>
  */
-class PhraseReadEvent extends Event
+class PhraseReadEvent extends AbstractPhraseEvent
 {
-    public function __construct(
-        private TranslatorBag $bag
-    ) {
-    }
-
-    public function getBag(): TranslatorBag
-    {
-        return $this->bag;
-    }
-
-    public function setBag(TranslatorBag $bag): void
-    {
-        $this->bag = $bag;
-    }
 }
