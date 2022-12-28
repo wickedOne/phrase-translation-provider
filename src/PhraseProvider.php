@@ -12,10 +12,12 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
+use Symfony\Component\Translation\Bridge\Phrase\Cache\PhraseCachedResponse;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseWriteEvent;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
@@ -44,6 +46,7 @@ class PhraseProvider implements ProviderInterface
         private readonly LoaderInterface $loader,
         private readonly XliffFileDumper $xliffFileDumper,
         private readonly EventDispatcherInterface $dispatcher,
+        private readonly CacheItemPoolInterface $cache,
         private readonly string $defaultLocale,
         private readonly string $endpoint,
     ) {
@@ -66,6 +69,9 @@ class PhraseProvider implements ProviderInterface
             $phraseLocale = $this->getLocale($locale);
 
             foreach ($domains as $domain) {
+                $item = $this->cache->getItem($phraseLocale.'.'.$domain);
+                $headers = $item->isHit() ? ['If-None-Match' => $item->get()->getEtag()] : [];
+
                 $response = $this->httpClient->request('GET', 'locales/'.$phraseLocale.'/download', [
                     'query' => [
                         'file_format' => 'symfony_xliff',
@@ -73,15 +79,22 @@ class PhraseProvider implements ProviderInterface
                         'format_options' => ['enclose_in_cdata'],
                         'include_empty_translations' => true,
                     ],
+                    'headers' => $headers,
                 ]);
 
-                if (200 !== $statusCode = $response->getStatusCode()) {
+                if (200 !== ($statusCode = $response->getStatusCode()) && 304 !== $statusCode) {
                     $this->logger->error(sprintf('Unable to get translations for locale "%s" from phrase: "%s".', $locale, $response->getContent(false)));
 
                     $this->throwProviderException($statusCode, $response, 'Unable to get translations from phrase.');
                 }
 
-                $translatorBag->addCatalogue($this->loader->load($response->getContent(), $locale, $domain));
+                $content = 304 === $statusCode ? $item->get()->getContent() : $response->getContent();
+                $translatorBag->addCatalogue($this->loader->load($content, $locale, $domain));
+
+                $headers = $response->getHeaders(false);
+                $item->set(new PhraseCachedResponse($headers['etag'][0], $headers['last-modified'][0], $content));
+
+                $this->cache->save($item);
             }
         }
 
