@@ -14,10 +14,13 @@ namespace Symfony\Component\Translation\Bridge\Phrase\Tests;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Translation\Bridge\Phrase\Cache\PhraseCachedResponse;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseWriteEvent;
 use Symfony\Component\Translation\Bridge\Phrase\PhraseProvider;
@@ -41,6 +44,7 @@ class PhraseProviderTest extends TestCase
     private MockObject&LoaderInterface $loader;
     private MockObject&XliffFileDumper $xliffFileDumper;
     private MockObject&EventDispatcherInterface $dispatcher;
+    private MockObject&CacheItemPoolInterface $cache;
     private string $defaultLocale;
     private string $endpoint;
 
@@ -62,6 +66,26 @@ class PhraseProviderTest extends TestCase
      */
     public function testRead(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->expects(self::once())->method('isHit')->willReturn(false);
+
+        $item
+            ->expects(self::once())
+            ->method('set')
+            ->with(self::callback(function ($item) use ($responseContent) {
+                $this->assertSame('W/"625d11cf081b1697cbc216edf6ebb13c"', $item->getEtag());
+                $this->assertSame('Wed, 28 Dec 2022 13:16:45 GMT', $item->getModified());
+                $this->assertSame($responseContent, $item->getContent());
+
+                return true;
+            }));
+
+        $this->getCache()
+            ->expects(self::once())
+            ->method('getItem')
+            ->with($localeId.'.'.$domain)
+            ->willReturn($item);
+
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
             'download locale' => $this->getDownloadLocaleResponseMock($domain, $localeId, $responseContent),
@@ -82,6 +106,70 @@ class PhraseProviderTest extends TestCase
             'headers' => [
                     'Authorization' => 'token API_TOKEN',
                     'User-Agent' => 'myProject',
+            ],
+        ]), endpoint: 'api.phrase.com/api/v2');
+
+        $translatorBag = $provider->read([$domain], [$locale]);
+
+        $this->assertSame($expectedTranslatorBag->getCatalogues(), $translatorBag->getCatalogues());
+    }
+
+    /**
+     * @dataProvider readProvider
+     */
+    public function testReadCached(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
+    {
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->expects(self::once())->method('isHit')->willReturn(true);
+
+        $cachedResponse = new PhraseCachedResponse('W/"625d11cf081b1697cbc216edf6ebb13c"', 'Wed, 28 Dec 2022 13:16:45 GMT', $responseContent);
+        $item->expects(self::exactly(2))->method('get')->willReturn($cachedResponse);
+
+        $item
+            ->expects(self::once())
+            ->method('set')
+            ->with(self::callback(function ($item) use ($responseContent) {
+                $this->assertSame('W/"625d11cf081b1697cbc216edf6ebb13c"', $item->getEtag());
+                $this->assertSame('Wed, 28 Dec 2022 13:16:45 GMT', $item->getModified());
+                $this->assertSame($responseContent, $item->getContent());
+
+                return true;
+            }));
+
+        $this->getCache()
+            ->expects(self::once())
+            ->method('getItem')
+            ->with($localeId.'.'.$domain)
+            ->willReturn($item);
+
+        $this->getCache()
+            ->expects(self::once())
+            ->method('save')
+            ->with($item);
+
+        $responses = [
+            'init locales' => $this->getInitLocaleResponseMock(),
+            'download locale' => new MockResponse('', ['http_code' => 304, 'response_headers' => [
+                'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
+                'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
+            ]]),
+        ];
+
+        $this->getLoader()
+            ->expects($this->once())
+            ->method('load')
+            ->willReturn($expectedTranslatorBag->getCatalogue($locale));
+
+        $this->getDispatcher()
+            ->expects(self::once())
+            ->method('dispatch')
+            ->with(self::isInstanceOf(PhraseReadEvent::class));
+
+        $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
+            'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
+            'headers' => [
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
             ],
         ]), endpoint: 'api.phrase.com/api/v2');
 
@@ -737,7 +825,10 @@ XLIFF,
             $this->assertArrayHasKey('query', $options);
             $this->assertSame($query, $options['query']);
 
-            return new MockResponse($responseContent);
+            return new MockResponse($responseContent, ['response_headers' => [
+                'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
+                'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
+            ]]);
         };
     }
 
@@ -770,6 +861,7 @@ XLIFF,
             $this->getLoader(),
             $dumper ?? $this->getXliffFileDumper(),
             $this->getDispatcher(),
+            $this->getCache(),
             $this->getDefaultLocale(),
             $endpoint ?? $this->getEndpoint()
         );
@@ -798,6 +890,11 @@ XLIFF,
     private function getDispatcher(): MockObject&EventDispatcherInterface
     {
         return $this->dispatcher ??= $this->createMock(EventDispatcherInterface::class);
+    }
+
+    private function getCache(): MockObject&CacheItemPoolInterface
+    {
+        return $this->cache ??= $this->createMock(CacheItemPoolInterface::class);
     }
 
     private function getDefaultLocale(): string

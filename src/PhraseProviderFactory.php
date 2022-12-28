@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
@@ -35,6 +36,7 @@ class PhraseProviderFactory extends AbstractProviderFactory
         private readonly LoaderInterface $loader,
         private readonly XliffFileDumper $xliffFileDumper,
         private readonly EventDispatcherInterface $dispatcher,
+        private readonly CacheItemPoolInterface $cache,
         private readonly string $defaultLocale,
     ) {
     }
@@ -56,7 +58,7 @@ class PhraseProviderFactory extends AbstractProviderFactory
             ],
         ]);
 
-        return new PhraseProvider($client, $this->logger, $this->loader, $this->xliffFileDumper, $this->dispatcher, $this->defaultLocale, $endpoint);
+        return new PhraseProvider($client, $this->logger, $this->loader, $this->xliffFileDumper, $this->dispatcher, $this->cache, $this->defaultLocale, $endpoint);
     }
 
     protected function getSupportedSchemes(): array

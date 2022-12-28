@@ -14,6 +14,7 @@ namespace Symfony\Component\Translation\Bridge\Phrase\Tests;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -35,6 +36,7 @@ class PhraseProviderFactoryTest extends TestCase
     private MockObject&LoaderInterface $loader;
     private MockObject&XliffFileDumper $xliffFileDumper;
     private MockObject&EventDispatcherInterface $dispatcher;
+    private MockObject&CacheItemPoolInterface $cache;
     private string $defaultLocale;
 
     /**
@@ -153,6 +155,7 @@ class PhraseProviderFactoryTest extends TestCase
             $this->getLoader(),
             $this->getXliffFileDumper(),
             $this->getDispatcher(),
+            $this->getCache(),
             $this->getDefaultLocale()
         );
     }
@@ -180,6 +183,11 @@ class PhraseProviderFactoryTest extends TestCase
     private function getDispatcher(): MockObject&EventDispatcherInterface
     {
         return $this->dispatcher ??= $this->createMock(EventDispatcherInterface::class);
+    }
+
+    private function getCache(): MockObject&CacheItemPoolInterface
+    {
+        return $this->cache ??= $this->createMock(CacheItemPoolInterface::class);
     }
 
     private function getDefaultLocale(): string
