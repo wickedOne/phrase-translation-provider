@@ -16,10 +16,6 @@ jobs:
 
     runs-on: ${{ matrix.operating-system }}
 
-    concurrency:
-      group: phpunit-${{ github.ref }}
-      cancel-in-progress: true
-
     strategy:
       matrix:
         dependencies:
@@ -59,10 +55,6 @@ jobs:
 
     runs-on: ${{ matrix.operating-system }}
 
-    concurrency:
-      group: mutation-${{ github.ref }}
-      cancel-in-progress: true
-
     strategy:
       matrix:
         dependencies:
@@ -99,10 +91,6 @@ jobs:
 
     runs-on: ${{ matrix.operating-system }}
 
-    concurrency:
-      group: phpstan-${{ github.ref }}
-      cancel-in-progress: true
-
     strategy:
       matrix:
         dependencies:
@@ -137,10 +125,6 @@ jobs:
     name: "php cs fixer"
 
     runs-on: ${{ matrix.operating-system }}
-
-    concurrency:
-      group: codestyle-${{ github.ref }}
-      cancel-in-progress: true
 
     strategy:
       matrix:
