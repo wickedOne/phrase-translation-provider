@@ -27,10 +27,6 @@ PHRASE_DSN=phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject
 
 - `userAgent`: please read [this](https://developers.phrase.com/api/#overview--identification-via-user-agent) for some examples.
 
-## ❗ curly delimiters for placeholders
-at the moment the phrase user interface to goes all bonkers when using curly brackets as delimiters for placeholders.
-phrase is aware of this issue and is currently looking into that. until that's resolved, try and not be bothered by it.
-
 ## service phrase provider
 in your `services.yaml` add the following to enable the phrase provider.
 ```yaml
