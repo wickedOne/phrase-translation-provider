@@ -54,7 +54,7 @@ if you define a locale in your `translation.yaml` which is not configured in you
 
 ## domains as tags
 translations will be tagged in phrase with the symfony translation domain they belong to.
-currently no feature to map domains to alternative tags is provided (helper to batch add tags to existing translations seems more sensible).
+check the [wickedone/phrase-translation-bundle](https://github.com/wickedOne/phrase-translation-bundle) if you need help managing your tags in phrase 
 
 ## cache
 the read responses from phrase are cached to speed up the read and delete method of this provider.
