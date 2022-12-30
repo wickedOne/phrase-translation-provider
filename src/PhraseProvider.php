@@ -31,12 +31,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
+ * @phpstan-type PhraseLocale array{id: string, name: string, code: string, fallback_locale?: ?array{id: string, name: string, code: string}}
+ *
  * @author wicliff <wicliff.wolda@gmail.com>
  */
 class PhraseProvider implements ProviderInterface
 {
     /**
-     * @var array<string, string>
+     * @var array<string, PhraseLocale>
      */
     private static array $phraseLocales = [];
 
@@ -69,7 +71,11 @@ class PhraseProvider implements ProviderInterface
             $phraseLocale = $this->getLocale($locale);
 
             foreach ($domains as $domain) {
-                $item = $this->cache->getItem($phraseLocale.'.'.$domain);
+                // phrase does not take the fallback_locale_id parameter into account with the
+                // conditional get request, so we use it in the cache key to make sure the response is correct
+                $fallbackLocale = $this->getFallbackLocale($locale);
+                $item = $this->cache->getItem($phraseLocale.'.'.$domain.'.'.$fallbackLocale);
+
                 $headers = $item->isHit() ? ['If-None-Match' => $item->get()->getEtag()] : [];
 
                 $response = $this->httpClient->request('GET', 'locales/'.$phraseLocale.'/download', [
@@ -78,6 +84,7 @@ class PhraseProvider implements ProviderInterface
                         'tags' => $domain,
                         'format_options' => ['enclose_in_cdata'],
                         'include_empty_translations' => true,
+                        'fallback_locale_id' => $fallbackLocale,
                     ],
                     'headers' => $headers,
                 ]);
@@ -192,7 +199,12 @@ class PhraseProvider implements ProviderInterface
             $this->createLocale($locale);
         }
 
-        return self::$phraseLocales[$locale];
+        return self::$phraseLocales[$locale]['id'];
+    }
+
+    private function getFallbackLocale(string $locale): ?string
+    {
+        return self::$phraseLocales[$locale]['fallback_locale']['code'] ?? null;
     }
 
     private function createLocale(string $locale): void
@@ -213,9 +225,10 @@ class PhraseProvider implements ProviderInterface
             $this->throwProviderException($statusCode, $response, 'Unable to create locale phrase.');
         }
 
+        /** @var PhraseLocale $phraseLocale */
         $phraseLocale = $response->toArray();
 
-        self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale['id'];
+        self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale;
     }
 
     private function initLocales(): void
@@ -229,7 +242,7 @@ class PhraseProvider implements ProviderInterface
         }
 
         foreach ($response->toArray() as $phraseLocale) {
-            self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale['id'];
+            self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale;
         }
     }
 
