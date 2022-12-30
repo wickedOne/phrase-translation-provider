@@ -64,7 +64,7 @@ class PhraseProviderTest extends TestCase
     /**
      * @dataProvider readProvider
      */
-    public function testRead(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
+    public function testRead(string $locale, string $localeId, ?string $fallbackLocale, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
         $item->expects(self::once())->method('isHit')->willReturn(false);
@@ -83,12 +83,12 @@ class PhraseProviderTest extends TestCase
         $this->getCache()
             ->expects(self::once())
             ->method('getItem')
-            ->with($localeId.'.'.$domain)
+            ->with($localeId.'.'.$domain.'.'.$fallbackLocale)
             ->willReturn($item);
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
-            'download locale' => $this->getDownloadLocaleResponseMock($domain, $localeId, $responseContent),
+            'download locale' => $this->getDownloadLocaleResponseMock($domain, $localeId, $fallbackLocale, $responseContent),
         ];
 
         $this->getLoader()
@@ -117,7 +117,7 @@ class PhraseProviderTest extends TestCase
     /**
      * @dataProvider readProvider
      */
-    public function testReadCached(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
+    public function testReadCached(string $locale, string $localeId, ?string $fallbackLocale, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
         $item->expects(self::once())->method('isHit')->willReturn(true);
@@ -139,7 +139,7 @@ class PhraseProviderTest extends TestCase
         $this->getCache()
             ->expects(self::once())
             ->method('getItem')
-            ->with($localeId.'.'.$domain)
+            ->with($localeId.'.'.$domain.'.'.$fallbackLocale)
             ->willReturn($item);
 
         $this->getCache()
@@ -269,9 +269,10 @@ class PhraseProviderTest extends TestCase
                     'id' => 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4',
                     'name' => 'nl_NL',
                     'code' => 'nl-NL',
+                    'fallback_locale' => null,
                 ], \JSON_THROW_ON_ERROR), ['http_code' => 201]);
             },
-            'download locale' => $this->getDownloadLocaleResponseMock('messages', 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4', ''),
+            'download locale' => $this->getDownloadLocaleResponseMock('messages', 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4', null, ''),
         ];
 
         $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
@@ -720,6 +721,7 @@ XLIFF;
         yield [
             'locale' => 'en_GB',
             'locale_id' => '13604ec993beefcdaba732812cdb828c',
+            'fallback_locale' => 'de',
             'domain' => 'messages',
             'content' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -768,6 +770,7 @@ XLIFF,
         yield [
             'locale' => 'de',
             'locale_id' => '5fea6ed5c21767730918a9400e420832',
+            'fallback_locale' => null,
             'domain' => 'validators',
             'content' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -815,14 +818,15 @@ XLIFF,
         ];
     }
 
-    private function getDownloadLocaleResponseMock(string $domain, string $localeId, string $responseContent): \Closure
+    private function getDownloadLocaleResponseMock(string $domain, string $localeId, ?string $fallbackLocale, string $responseContent): \Closure
     {
-        return function (string $method, string $url, array $options) use ($domain, $localeId, $responseContent): ResponseInterface {
+        return function (string $method, string $url, array $options) use ($domain, $localeId, $fallbackLocale, $responseContent): ResponseInterface {
             $query = [
                 'file_format' => 'symfony_xliff',
                 'tags' => $domain,
                 'format_options' => ['enclose_in_cdata'],
                 'include_empty_translations' => true,
+                'fallback_locale_id' => $fallbackLocale,
             ];
 
             $this->assertSame('GET', $method);
@@ -848,11 +852,17 @@ XLIFF,
                     'id' => '5fea6ed5c21767730918a9400e420832',
                     'name' => 'de',
                     'code' => 'de',
+                    'fallback_locale' => null,
                 ],
                 [
                     'id' => '13604ec993beefcdaba732812cdb828c',
                     'name' => 'en',
                     'code' => 'en-GB',
+                    'fallback_locale' => [
+                        'id' => '5fea6ed5c21767730918a9400e420832',
+                        'name' => 'de',
+                        'code' => 'de',
+                    ],
                 ],
             ], \JSON_THROW_ON_ERROR));
         };
