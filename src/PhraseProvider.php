@@ -67,8 +67,8 @@ class PhraseProvider implements ProviderInterface
     }
 
     /**
-     * @param array<array-key, string> $domains
-     * @param array<array-key, string> $locales
+     * @param array<array-key, mixed> $domains
+     * @param array<array-key, mixed> $locales
      */
     public function read(array $domains, array $locales): TranslatorBag
     {
@@ -118,11 +118,10 @@ class PhraseProvider implements ProviderInterface
         return $event->getBag();
     }
 
-    /**
-     * @param \Symfony\Component\Translation\TranslatorBag $translatorBag
-     */
     public function write(TranslatorBagInterface $translatorBag): void
     {
+        \assert($translatorBag instanceof TranslatorBag);
+
         $event = new PhraseWriteEvent($translatorBag);
         $this->dispatcher->dispatch($event);
 

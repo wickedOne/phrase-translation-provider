@@ -112,7 +112,7 @@ jobs:
           coverage: "none"
           php-version: "${{ matrix.php-version }}"
           ini-values: memory_limit=-1
-          tools: composer:v2, cs2pr
+          tools: cs2pr
 
       - name: "install dependencies"
         uses: "ramsey/composer-install@2.2.0"
@@ -121,6 +121,40 @@ jobs:
 
       - name: "phpstan"
         run: "vendor/bin/phpstan analyse --memory-limit=-1 --error-format=checkstyle | cs2pr"
+
+  static-analysis-psalm:
+    name: "static analysis psalm"
+
+    runs-on: ${{ matrix.operating-system }}
+
+    strategy:
+      matrix:
+        dependencies:
+          - "locked"
+        php-version:
+          - "8.1"
+          - "8.2"
+        operating-system:
+          - "ubuntu-latest"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v3"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "${{ matrix.php-version }}"
+          ini-values: memory_limit=-1
+
+      - name: "Install dependencies"
+        uses: "ramsey/composer-install@2.1.0"
+        with:
+          dependency-versions: "${{ matrix.dependencies }}"
+
+      - name: "psalm"
+        run: "vendor/bin/psalm --shepherd --stats"
 
   coding-standards:
     name: "php cs fixer"
