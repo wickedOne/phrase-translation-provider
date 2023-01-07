@@ -18,6 +18,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Mime\Part\DataPart;
 use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 use Symfony\Component\Translation\Bridge\Phrase\Cache\PhraseCachedResponse;
+use Symfony\Component\Translation\Bridge\Phrase\Config\ReadConfig;
+use Symfony\Component\Translation\Bridge\Phrase\Config\WriteConfig;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseWriteEvent;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
@@ -31,6 +33,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
+ * @phpstan-import-type PhraseReadConfig from ReadConfig
+ * @phpstan-import-type PhraseWriteConfig from WriteConfig
+ *
  * @phpstan-type PhraseLocale array{id: string, name: string, code: string, fallback_locale?: ?array{id: string, name: string, code: string}}
  *
  * @author wicliff <wicliff.wolda@gmail.com>
@@ -51,6 +56,8 @@ class PhraseProvider implements ProviderInterface
         private readonly CacheItemPoolInterface $cache,
         private readonly string $defaultLocale,
         private readonly string $endpoint,
+        private readonly ReadConfig $readConfig,
+        private readonly WriteConfig $writeConfig,
     ) {
     }
 
@@ -71,21 +78,19 @@ class PhraseProvider implements ProviderInterface
             $phraseLocale = $this->getLocale($locale);
 
             foreach ($domains as $domain) {
-                // phrase does not take the fallback_locale_id parameter into account with the
-                // conditional get request, so we use it in the cache key to make sure the response is correct
-                $fallbackLocale = $this->getFallbackLocale($locale);
-                $item = $this->cache->getItem($phraseLocale.'.'.$domain.'.'.$fallbackLocale);
+                $this->readConfig->withTag($domain);
+
+                if ($this->readConfig->isFallbackLocaleEnabled() && null !== $fallbackLocale = $this->getFallbackLocale($locale)) {
+                    $this->readConfig->withFallbackLocale($fallbackLocale);
+                }
+
+                $key = $this->key($locale, $domain, $this->readConfig->getOptions());
+                $item = $this->cache->getItem($key);
 
                 $headers = $item->isHit() ? ['If-None-Match' => $item->get()->getEtag()] : [];
 
                 $response = $this->httpClient->request('GET', 'locales/'.$phraseLocale.'/download', [
-                    'query' => [
-                        'file_format' => 'symfony_xliff',
-                        'tags' => $domain,
-                        'format_options' => ['enclose_in_cdata'],
-                        'include_empty_translations' => true,
-                        'fallback_locale_id' => $fallbackLocale,
-                    ],
+                    'query' => $this->readConfig->getOptions(),
                     'headers' => $headers,
                 ]);
 
@@ -98,10 +103,12 @@ class PhraseProvider implements ProviderInterface
                 $content = 304 === $statusCode ? $item->get()->getContent() : $response->getContent();
                 $translatorBag->addCatalogue($this->loader->load($content, $locale, $domain));
 
-                $headers = $response->getHeaders(false);
-                $item->set(new PhraseCachedResponse($headers['etag'][0], $headers['last-modified'][0], $content));
-
-                $this->cache->save($item);
+                // using weak etags, responses for requests with fallback locale enabled can not be reliably cached...
+                if (false === $this->readConfig->isFallbackLocaleEnabled()) {
+                    $headers = $response->getHeaders(false);
+                    $item->set(new PhraseCachedResponse($headers['etag'][0], $headers['last-modified'][0], $content));
+                    $this->cache->save($item);
+                }
             }
         }
 
@@ -133,13 +140,7 @@ class PhraseProvider implements ProviderInterface
                 $content = $this->xliffFileDumper->formatCatalogue($catalogue, $domain, ['default_locale' => $this->defaultLocale]);
                 $filename = sprintf('%d-%s-%s.xlf', date('YmdHis'), $domain, $catalogue->getLocale());
 
-                $fields = [
-                    'file_format' => 'symfony_xliff',
-                    'file' => new DataPart($content, $filename, 'application/xml'),
-                    'locale_id' => $phraseLocale,
-                    'tags' => $domain,
-                    'update_translations' => '1',
-                ];
+                $fields = array_merge($this->writeConfig->withTag($domain)->withLocale($phraseLocale)->getOptions(), ['file' => new DataPart($content, $filename, 'application/xml')]);
 
                 $formData = new FormDataPart($fields);
 
@@ -187,6 +188,16 @@ class PhraseProvider implements ProviderInterface
     public static function resetPhraseLocales(): void
     {
         self::$phraseLocales = [];
+    }
+
+    /**
+     * @param PhraseReadConfig|PhraseWriteConfig $options
+     */
+    private function key(string $locale, string $domain, array $options): string
+    {
+        array_multisort($options);
+
+        return sprintf('%s.%s.%s', $locale, $domain, sha1(serialize($options)));
     }
 
     private function getLocale(string $locale): string

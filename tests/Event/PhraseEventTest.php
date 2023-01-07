@@ -10,7 +10,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Component\Translation\Bridge\Phrase\Tests;
+namespace Symfony\Component\Translation\Bridge\Phrase\Tests\Event;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
