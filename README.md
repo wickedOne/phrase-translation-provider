@@ -31,7 +31,7 @@ PHRASE_DSN=phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject
 
 - `userAgent`: please read [this](https://developers.phrase.com/api/#overview--identification-via-user-agent) for some examples.
 
-> see [fine tuning your phrase api calls](#fine tuning your phrase api calls) for additional dsn options
+see [fine tuning your phrase api calls](#fine-tuning-your-phrase-api-calls) for additional dsn options
 
 ## service phrase provider
 
