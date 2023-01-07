@@ -21,6 +21,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Translation\Bridge\Phrase\Cache\PhraseCachedResponse;
+use Symfony\Component\Translation\Bridge\Phrase\Config\ReadConfig;
+use Symfony\Component\Translation\Bridge\Phrase\Config\WriteConfig;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseWriteEvent;
 use Symfony\Component\Translation\Bridge\Phrase\PhraseProvider;
@@ -33,6 +35,8 @@ use Symfony\Component\Translation\TranslatorBag;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
+ * @phpstan-import-type PhraseReadConfig from ReadConfig
+ *
  * @phpstan-type ExceptionDefinition array{statusCode: int, exceptionMessage: string, loggerMessage: string}
  *
  * @author wicliff <wicliff.wolda@gmail.com>
@@ -47,6 +51,8 @@ class PhraseProviderTest extends TestCase
     private MockObject&CacheItemPoolInterface $cache;
     private string $defaultLocale;
     private string $endpoint;
+    private MockObject&ReadConfig $readConfig;
+    private MockObject&WriteConfig $writeConfig;
 
     protected function tearDown(): void
     {
@@ -64,7 +70,7 @@ class PhraseProviderTest extends TestCase
     /**
      * @dataProvider readProvider
      */
-    public function testRead(string $locale, string $localeId, ?string $fallbackLocale, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
+    public function testRead(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
         $item->expects(self::once())->method('isHit')->willReturn(false);
@@ -83,12 +89,18 @@ class PhraseProviderTest extends TestCase
         $this->getCache()
             ->expects(self::once())
             ->method('getItem')
-            ->with($localeId.'.'.$domain.'.'.$fallbackLocale)
+            ->with(self::callback(function ($v) use ($locale, $domain) {
+                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+
+                return true;
+            }))
             ->willReturn($item);
+
+        $this->readConfigWithDefaultValues($domain);
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
-            'download locale' => $this->getDownloadLocaleResponseMock($domain, $localeId, $fallbackLocale, $responseContent),
+            'download locale' => $this->getDownloadLocaleResponseMock($domain, $localeId, $responseContent),
         ];
 
         $this->getLoader()
@@ -104,8 +116,8 @@ class PhraseProviderTest extends TestCase
         $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
             'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
             'headers' => [
-                    'Authorization' => 'token API_TOKEN',
-                    'User-Agent' => 'myProject',
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
             ],
         ]), endpoint: 'api.phrase.com/api/v2');
 
@@ -117,7 +129,7 @@ class PhraseProviderTest extends TestCase
     /**
      * @dataProvider readProvider
      */
-    public function testReadCached(string $locale, string $localeId, ?string $fallbackLocale, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
+    public function testReadCached(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
         $item->expects(self::once())->method('isHit')->willReturn(true);
@@ -139,13 +151,19 @@ class PhraseProviderTest extends TestCase
         $this->getCache()
             ->expects(self::once())
             ->method('getItem')
-            ->with($localeId.'.'.$domain.'.'.$fallbackLocale)
+            ->with(self::callback(function ($v) use ($locale, $domain) {
+                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+
+                return true;
+            }))
             ->willReturn($item);
 
         $this->getCache()
             ->expects(self::once())
             ->method('save')
             ->with($item);
+
+        $this->readConfigWithDefaultValues($domain);
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
@@ -181,6 +199,196 @@ class PhraseProviderTest extends TestCase
         $translatorBag = $provider->read([$domain], [$locale]);
 
         $this->assertSame($expectedTranslatorBag->getCatalogues(), $translatorBag->getCatalogues());
+    }
+
+    public function testReadFallbackLocale(): void
+    {
+        $locale = 'en_GB';
+        $localeId = '13604ec993beefcdaba732812cdb828c';
+        $domain = 'messages';
+
+        $bag = new TranslatorBag();
+        $catalogue = new MessageCatalogue('en_GB', [
+            'general.back' => 'back  {{ placeholder }} </rant >',
+            'general.cancel' => 'Cancel',
+        ]);
+
+        $catalogue->setMetadata('general.back', [
+            'notes' => [
+                'this should have a cdata section',
+            ],
+            'target-attributes' => [
+                'state' => 'signed-off',
+            ],
+        ]);
+
+        $catalogue->setMetadata('general.cancel', [
+            'target-attributes' => [
+                'state' => 'translated',
+            ],
+        ]);
+
+        $bag->addCatalogue($catalogue);
+
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->expects(self::once())->method('isHit')->willReturn(false);
+
+        $item
+            ->expects(self::never())
+            ->method('set');
+
+        $this->getCache()
+            ->expects(self::once())
+            ->method('getItem')
+            ->with(self::callback(function ($v) use ($locale, $domain) {
+                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+
+                return true;
+            }))
+            ->willReturn($item);
+
+        $this->getCache()
+            ->expects(self::never())
+            ->method('save');
+
+        $this->getReadConfig()
+            ->method('getOptions')
+            ->willReturn([
+                'file_format' => 'symfony_xliff',
+                'include_empty_translations' => '1',
+                'tags' => $domain,
+                'format_options' => [
+                    'enclose_in_cdata' => '1',
+                ],
+                'fallback_locale_id' => 'de',
+            ]);
+
+        $this->getReadConfig()
+            ->expects(self::once())
+            ->method('withTag')
+            ->with($domain)
+            ->willReturnSelf();
+
+        $this->getReadConfig()
+            ->expects(self::once())
+            ->method('withFallbackLocale')
+            ->with('de')
+            ->willReturnSelf();
+
+        $this->getReadConfig()
+            ->expects(self::exactly(2))
+            ->method('isFallbackLocaleEnabled')
+            ->willReturn(true);
+
+        $responses = [
+            'init locales' => $this->getInitLocaleResponseMock(),
+            'download locale' => function (string $method, string $url, array $options) use ($localeId): ResponseInterface {
+                $query = [
+                    'file_format' => 'symfony_xliff',
+                    'include_empty_translations' => '1',
+                    'tags' => 'messages',
+                    'format_options' => [
+                        'enclose_in_cdata' => '1',
+                    ],
+                    'fallback_locale_id' => 'de',
+                ];
+
+                $this->assertSame('GET', $method);
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/'.$localeId.'/download?'.http_build_query($query), $url);
+                $this->assertNotContains('If-None-Match: W/"625d11cf081b1697cbc216edf6ebb13c"', $options['headers']);
+                $this->assertArrayHasKey('query', $options);
+                $this->assertSame($query, $options['query']);
+
+                return new MockResponse();
+            },
+        ];
+
+        $this->getLoader()
+            ->expects($this->once())
+            ->method('load')
+            ->willReturn($bag->getCatalogue($locale));
+
+        $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
+            'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
+            'headers' => [
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
+            ],
+        ]), endpoint: 'api.phrase.com/api/v2');
+
+        $provider->read([$domain], [$locale]);
+    }
+
+    /**
+     * @dataProvider cacheKeyProvider
+     *
+     * @param PhraseReadConfig $options
+     */
+    public function testCacheKeyOptionsSort(array $options, string $expectedKey): void
+    {
+        $this->getCache()
+            ->expects(self::once())
+            ->method('getItem')
+            ->with($expectedKey);
+
+        $this->getReadConfig()
+            ->method('getOptions')
+            ->willReturn($options);
+
+        $this->getReadConfig()
+            ->expects(self::once())
+            ->method('withTag')
+            ->with('messages')
+            ->willReturnSelf();
+
+        $responses = [
+            'init locales' => $this->getInitLocaleResponseMock(),
+            'download locale' => function (string $method, string $url, array $options = []): ResponseInterface {
+                $this->assertSame('GET', $method);
+
+                return new MockResponse('', ['http_code' => 200, 'response_headers' => [
+                    'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
+                    'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
+                ]]);
+            },
+        ];
+
+        $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
+            'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
+            'headers' => [
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
+            ],
+        ]), endpoint: 'api.phrase.com/api/v2');
+
+        $provider->read(['messages'], ['en_GB']);
+    }
+
+    public function cacheKeyProvider(): \Generator
+    {
+        yield 'sortorder one' => [
+            'options' => [
+                'file_format' => 'symfony_xliff',
+                'include_empty_translations' => '1',
+                'tags' => [],
+                'format_options' => [
+                    'enclose_in_cdata' => '1',
+                ],
+            ],
+            'expected_key' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
+        ];
+
+        yield 'sortorder two' => [
+            'options' => [
+                'include_empty_translations' => '1',
+                'file_format' => 'symfony_xliff',
+                'format_options' => [
+                    'enclose_in_cdata' => '1',
+                ],
+                'tags' => [],
+            ],
+            'expected_key' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
+        ];
     }
 
     /**
@@ -256,6 +464,8 @@ class PhraseProviderTest extends TestCase
 
     public function testCreateUnknownLocale(): void
     {
+        $this->readConfigWithDefaultValues('messages');
+
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
             'create locale' => function (string $method, string $url, array $options = []): ResponseInterface {
@@ -272,7 +482,7 @@ class PhraseProviderTest extends TestCase
                     'fallback_locale' => null,
                 ], \JSON_THROW_ON_ERROR), ['http_code' => 201]);
             },
-            'download locale' => $this->getDownloadLocaleResponseMock('messages', 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4', null, ''),
+            'download locale' => $this->getDownloadLocaleResponseMock('messages', 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4', ''),
         ];
 
         $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
@@ -402,6 +612,8 @@ class PhraseProviderTest extends TestCase
      */
     public function testWrite(string $locale, string $localeId, string $domain, string $content, TranslatorBag $bag): void
     {
+        $this->writeConfigWithDefaultValues($domain, $localeId);
+
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
             'upload file' => function (string $method, string $url, array $options = []) use ($domain, $locale, $localeId, $content): ResponseInterface {
@@ -721,7 +933,6 @@ XLIFF;
         yield [
             'locale' => 'en_GB',
             'locale_id' => '13604ec993beefcdaba732812cdb828c',
-            'fallback_locale' => 'de',
             'domain' => 'messages',
             'content' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -770,7 +981,6 @@ XLIFF,
         yield [
             'locale' => 'de',
             'locale_id' => '5fea6ed5c21767730918a9400e420832',
-            'fallback_locale' => null,
             'domain' => 'validators',
             'content' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -818,15 +1028,16 @@ XLIFF,
         ];
     }
 
-    private function getDownloadLocaleResponseMock(string $domain, string $localeId, ?string $fallbackLocale, string $responseContent): \Closure
+    private function getDownloadLocaleResponseMock(string $domain, string $localeId, string $responseContent): \Closure
     {
-        return function (string $method, string $url, array $options) use ($domain, $localeId, $fallbackLocale, $responseContent): ResponseInterface {
+        return function (string $method, string $url, array $options) use ($domain, $localeId, $responseContent): ResponseInterface {
             $query = [
                 'file_format' => 'symfony_xliff',
+                'include_empty_translations' => '1',
                 'tags' => $domain,
-                'format_options' => ['enclose_in_cdata'],
-                'include_empty_translations' => true,
-                'fallback_locale_id' => $fallbackLocale,
+                'format_options' => [
+                    'enclose_in_cdata' => '1',
+                ],
             ];
 
             $this->assertSame('GET', $method);
@@ -878,7 +1089,9 @@ XLIFF,
             $this->getDispatcher(),
             $this->getCache(),
             $this->getDefaultLocale(),
-            $endpoint ?? $this->getEndpoint()
+            $endpoint ?? $this->getEndpoint(),
+            $this->getReadConfig(),
+            $this->getWriteConfig()
         );
     }
 
@@ -920,5 +1133,53 @@ XLIFF,
     private function getEndpoint(): string
     {
         return $this->endpoint ??= 'api.phrase.com';
+    }
+
+    private function getReadConfig(): ReadConfig&MockObject
+    {
+        return $this->readConfig ??= $this->createMock(ReadConfig::class);
+    }
+
+    private function getWriteConfig(): WriteConfig&MockObject
+    {
+        return $this->writeConfig ??= $this->createMock(WriteConfig::class);
+    }
+
+    private function readConfigWithDefaultValues(string $domain): void
+    {
+        $this->getReadConfig()
+            ->method('getOptions')
+            ->willReturn([
+                'file_format' => 'symfony_xliff',
+                'include_empty_translations' => '1',
+                'tags' => $domain,
+                'format_options' => [
+                    'enclose_in_cdata' => '1',
+                ],
+            ]);
+    }
+
+    private function writeConfigWithDefaultValues(string $domain, string $phraseLocale): void
+    {
+        $this->getWriteConfig()
+            ->method('getOptions')
+            ->willReturn([
+                'file_format' => 'symfony_xliff',
+                'update_translations' => '1',
+                'tags' => $domain,
+                'locale_id' => $phraseLocale,
+            ]);
+
+        $this->getWriteConfig()
+            ->expects(self::once())
+            ->method('withTag')
+            ->with($domain)
+            ->willReturnSelf();
+
+        $this->getWriteConfig()
+            ->expects(self::once())
+            ->method('withLocale')
+            ->with($phraseLocale)
+            ->willReturnSelf();
     }
 }

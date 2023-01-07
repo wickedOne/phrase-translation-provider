@@ -15,6 +15,8 @@ namespace Symfony\Component\Translation\Bridge\Phrase;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Translation\Bridge\Phrase\Config\ReadConfig;
+use Symfony\Component\Translation\Bridge\Phrase\Config\WriteConfig;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Exception\UnsupportedSchemeException;
 use Symfony\Component\Translation\Loader\LoaderInterface;
@@ -58,7 +60,10 @@ class PhraseProviderFactory extends AbstractProviderFactory
             ],
         ]);
 
-        return new PhraseProvider($client, $this->logger, $this->loader, $this->xliffFileDumper, $this->dispatcher, $this->cache, $this->defaultLocale, $endpoint);
+        $readConfig = ReadConfig::fromDsn($dsn);
+        $writeConfig = WriteConfig::fromDsn($dsn);
+
+        return new PhraseProvider($client, $this->logger, $this->loader, $this->xliffFileDumper, $this->dispatcher, $this->cache, $this->defaultLocale, $endpoint, $readConfig, $writeConfig);
     }
 
     protected function getSupportedSchemes(): array
