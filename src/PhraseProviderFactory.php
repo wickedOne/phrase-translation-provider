@@ -50,12 +50,12 @@ class PhraseProviderFactory extends AbstractProviderFactory
         }
 
         $endpoint = 'default' === $dsn->getHost() ? self::HOST : $dsn->getHost();
-        $endpoint .= $dsn->getPort() ? ':'.(string) $dsn->getPort() : '';
+        $endpoint .= $dsn->getPort() ? ':' . (string) $dsn->getPort() : '';
 
         $client = $this->httpClient->withOptions([
-            'base_uri' => 'https://'.$endpoint.'/v2/projects/'.$this->getUser($dsn).'/',
+            'base_uri' => 'https://' . $endpoint . '/v2/projects/' . $this->getUser($dsn) . '/',
             'headers' => [
-                'Authorization' => 'token '.$this->getPassword($dsn),
+                'Authorization' => 'token ' . $this->getPassword($dsn),
                 'User-Agent' => $dsn->getRequiredOption('userAgent'),
             ],
         ]);

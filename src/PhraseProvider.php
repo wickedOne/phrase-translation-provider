@@ -89,7 +89,7 @@ class PhraseProvider implements ProviderInterface
 
                 $headers = $item->isHit() ? ['If-None-Match' => $item->get()->getEtag()] : [];
 
-                $response = $this->httpClient->request('GET', 'locales/'.$phraseLocale.'/download', [
+                $response = $this->httpClient->request('GET', 'locales/' . $phraseLocale . '/download', [
                     'query' => $this->readConfig->getOptions(),
                     'headers' => $headers,
                 ]);
@@ -171,7 +171,7 @@ class PhraseProvider implements ProviderInterface
             foreach ($names as $name) {
                 $response = $this->httpClient->request('DELETE', 'keys', [
                     'query' => [
-                        'q' => 'name:'.$name,
+                        'q' => 'name:' . $name,
                     ],
                 ]);
 
