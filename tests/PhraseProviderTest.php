@@ -29,6 +29,7 @@ use Symfony\Component\Translation\Bridge\Phrase\PhraseProvider;
 use Symfony\Component\Translation\Dumper\XliffFileDumper;
 use Symfony\Component\Translation\Exception\ProviderExceptionInterface;
 use Symfony\Component\Translation\Loader\LoaderInterface;
+use Symfony\Component\Translation\LoggingTranslator;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Provider\ProviderInterface;
 use Symfony\Component\Translation\TranslatorBag;
@@ -362,6 +363,16 @@ class PhraseProviderTest extends TestCase
         ]), endpoint: 'api.phrase.com/api/v2');
 
         $provider->read(['messages'], ['en_GB']);
+    }
+
+    public function testTranslatorBagAssert(): void
+    {
+        $this->expectExceptionMessage('assert($translatorBag instanceof TranslatorBag)');
+
+        $trans = $this->createMock(LoggingTranslator::class);
+        $provider = $this->createProvider();
+
+        $provider->write($trans);
     }
 
     public function cacheKeyProvider(): \Generator
