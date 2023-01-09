@@ -29,6 +29,21 @@ use Symfony\Component\Translation\Provider\Dsn;
  *  autotranslate?: string,
  *  mark_reviewed?: string,
  * }
+ * @phpstan-type PhraseDsnWriteConfig array{
+ *  file_format?: string,
+ *  update_translations?: string,
+ *  tags?: string,
+ *  locale_id?: string,
+ *  file?: string,
+ *  update_descriptions?: string,
+ *  skip_upload_tags?: string,
+ *  skip_unverification?: string,
+ *  file_encoding?: string,
+ *  locale_mapping?: array<string, string>,
+ *  format_options?: array<string, string>,
+ *  autotranslate?: string,
+ *  mark_reviewed?: string,
+ * }
  *
  * @author wicliff <wicliff.wolda@gmail.com>
  */
@@ -71,6 +86,7 @@ class WriteConfig
 
     public static function fromDsn(Dsn $dsn): self
     {
+        /** @var PhraseDsnWriteConfig&array $options */
         $options = $dsn->getOptions()['write'] ?? [];
 
         unset($options['file_format'], $options['tags'], $options['locale_id'], $options['file']);
