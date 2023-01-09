@@ -91,7 +91,7 @@ class PhraseProviderTest extends TestCase
             ->expects(self::once())
             ->method('getItem')
             ->with(self::callback(function ($v) use ($locale, $domain) {
-                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+                $this->assertStringStartsWith($locale . '.' . $domain . '.', $v);
 
                 return true;
             }))
@@ -153,7 +153,7 @@ class PhraseProviderTest extends TestCase
             ->expects(self::once())
             ->method('getItem')
             ->with(self::callback(function ($v) use ($locale, $domain) {
-                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+                $this->assertStringStartsWith($locale . '.' . $domain . '.', $v);
 
                 return true;
             }))
@@ -242,7 +242,7 @@ class PhraseProviderTest extends TestCase
             ->expects(self::once())
             ->method('getItem')
             ->with(self::callback(function ($v) use ($locale, $domain) {
-                $this->assertStringStartsWith($locale.'.'.$domain.'.', $v);
+                $this->assertStringStartsWith($locale . '.' . $domain . '.', $v);
 
                 return true;
             }))
@@ -295,7 +295,7 @@ class PhraseProviderTest extends TestCase
                 ];
 
                 $this->assertSame('GET', $method);
-                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/'.$localeId.'/download?'.http_build_query($query), $url);
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . http_build_query($query), $url);
                 $this->assertNotContains('If-None-Match: W/"625d11cf081b1697cbc216edf6ebb13c"', $options['headers']);
                 $this->assertArrayHasKey('query', $options);
                 $this->assertSame($query, $options['query']);
@@ -642,7 +642,7 @@ class PhraseProviderTest extends TestCase
                         $testedFileFormat = true;
                     }
                     if (preg_match('/filename="([^"]+)/', $part, $matches)) {
-                        $this->assertStringEndsWith($domain.'-'.$locale.'.xlf', $matches[1]);
+                        $this->assertStringEndsWith($domain . '-' . $locale . '.xlf', $matches[1]);
                         $testedFileName = true;
                     }
 
@@ -1052,7 +1052,7 @@ XLIFF,
             ];
 
             $this->assertSame('GET', $method);
-            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/'.$localeId.'/download?'.http_build_query($query), $url);
+            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . http_build_query($query), $url);
             $this->assertArrayHasKey('query', $options);
             $this->assertSame($query, $options['query']);
 

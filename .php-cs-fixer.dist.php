@@ -10,13 +10,13 @@ EOF;
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
-    ->setRules(array(
+    ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'combine_consecutive_unsets' => true,
-        'array_syntax' => array('syntax' => 'short'),
+        'array_syntax' => ['syntax' => 'short'],
         'no_extra_blank_lines' => ['tokens' => ['break', 'continue', 'extra', 'return', 'throw', 'use', 'parenthesis_brace_block', 'square_brace_block', 'curly_brace_block']],
-        'header_comment' => array('header' => $header),
+        'header_comment' => ['header' => $header],
         'no_useless_else' => true,
         'no_useless_return' => true,
         'ordered_class_elements' => true,
@@ -26,8 +26,9 @@ return (new PhpCsFixer\Config())
         'psr_autoloading' => true,
         'strict_comparison' => true,
         'strict_param' => true,
-        'fopen_flags' => array('b_mode' => true),
-    ))
+        'fopen_flags' => ['b_mode' => true],
+        'concat_space' => ['spacing' => 'one'],
+    ])
     ->setFinder(
         (new PhpCsFixer\Finder())
             ->in([__DIR__ . '/src/', __DIR__ . '/tests/'])
