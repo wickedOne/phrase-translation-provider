@@ -31,7 +31,7 @@ use Symfony\Component\Translation\Provider\Dsn;
  * }
  * @phpstan-type PhraseDsnReadConfig array{
  *  file_format?: string,
- *  format_options?: array<array-key, mixed>,
+ *  format_options?: array<array-key, string>,
  *  tags?: string,
  *  tag?: string,
  *  fallback_locale_enabled?: string,
@@ -97,7 +97,7 @@ class ReadConfig
 
     public static function fromDsn(Dsn $dsn): self
     {
-        /** @var PhraseDsnReadConfig&array $options */
+        /** @var PhraseDsnReadConfig $options */
         $options = $dsn->getOptions()['read'] ?? [];
         $fallbackLocale = $options['fallback_locale_enabled'] ?? '0';
 

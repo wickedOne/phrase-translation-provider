@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase;
 
+use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
@@ -91,7 +92,7 @@ class PhraseProvider implements ProviderInterface
                 $key = $this->key($locale, $domain, $this->readConfig->getOptions());
                 $item = $this->cache->getItem($key);
 
-                $headers = $item->isHit() ? ['If-None-Match' => $item->get()->getEtag()] : [];
+                $headers = null !== ($cache = $this->getCache($item)) ? ['If-None-Match' => $cache->getEtag()] : [];
 
                 $response = $this->httpClient->request('GET', 'locales/' . $phraseLocale . '/download', [
                     'query' => $this->readConfig->getOptions(),
@@ -104,8 +105,7 @@ class PhraseProvider implements ProviderInterface
                     $this->throwProviderException($statusCode, $response, 'Unable to get translations from phrase.');
                 }
 
-                /** @var string $content */
-                $content = 304 === $statusCode ? $item->get()->getContent() : $response->getContent();
+                $content = 304 === $statusCode && null !== ($cache = $this->getCache($item)) ? $cache->getContent() : $response->getContent();
                 $translatorBag->addCatalogue($this->loader->load($content, $locale, $domain));
 
                 // using weak etags, responses for requests with fallback locale enabled can not be reliably cached...
@@ -194,6 +194,15 @@ class PhraseProvider implements ProviderInterface
     public static function resetPhraseLocales(): void
     {
         self::$phraseLocales = [];
+    }
+
+    private function getCache(CacheItemInterface $item): ?PhraseCachedResponse
+    {
+        if (false === $item->isHit() || null === ($cache = $item->get()) || !$cache instanceof PhraseCachedResponse) {
+            return null;
+        }
+
+        return $cache;
     }
 
     /**

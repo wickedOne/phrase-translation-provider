@@ -133,7 +133,7 @@ class PhraseProviderTest extends TestCase
     public function testReadCached(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
-        $item->expects(self::once())->method('isHit')->willReturn(true);
+        $item->expects(self::exactly(2))->method('isHit')->willReturn(true);
 
         $cachedResponse = new PhraseCachedResponse('W/"625d11cf081b1697cbc216edf6ebb13c"', 'Wed, 28 Dec 2022 13:16:45 GMT', $responseContent);
         $item->expects(self::exactly(2))->method('get')->willReturn($cachedResponse);
@@ -233,10 +233,7 @@ class PhraseProviderTest extends TestCase
 
         $item = $this->createMock(CacheItemInterface::class);
         $item->expects(self::once())->method('isHit')->willReturn(false);
-
-        $item
-            ->expects(self::never())
-            ->method('set');
+        $item->expects(self::never())->method('set');
 
         $this->getCache()
             ->expects(self::once())
@@ -248,9 +245,7 @@ class PhraseProviderTest extends TestCase
             }))
             ->willReturn($item);
 
-        $this->getCache()
-            ->expects(self::never())
-            ->method('save');
+        $this->getCache()->expects(self::never())->method('save');
 
         $this->getReadConfig()
             ->method('getOptions')
@@ -264,22 +259,10 @@ class PhraseProviderTest extends TestCase
                 'fallback_locale_id' => 'de',
             ]);
 
-        $this->getReadConfig()
-            ->expects(self::once())
-            ->method('withTag')
-            ->with($domain)
-            ->willReturnSelf();
-
-        $this->getReadConfig()
-            ->expects(self::once())
-            ->method('withFallbackLocale')
-            ->with('de')
-            ->willReturnSelf();
-
-        $this->getReadConfig()
-            ->expects(self::exactly(2))
-            ->method('isFallbackLocaleEnabled')
-            ->willReturn(true);
+        $this->getReadConfig()->expects(self::once())->method('withTag')->with($domain)->willReturnSelf();
+        $this->getReadConfig()->expects(self::once())->method('withFallbackLocale')->with('de')->willReturnSelf();
+        $this->getReadConfig()->expects(self::exactly(2))->method('isFallbackLocaleEnabled')->willReturn(true);
+        $this->getLoader()->expects($this->once())->method('load')->willReturn($bag->getCatalogue($locale));
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
@@ -304,11 +287,6 @@ class PhraseProviderTest extends TestCase
             },
         ];
 
-        $this->getLoader()
-            ->expects($this->once())
-            ->method('load')
-            ->willReturn($bag->getCatalogue($locale));
-
         $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
             'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
             'headers' => [
@@ -327,24 +305,17 @@ class PhraseProviderTest extends TestCase
      */
     public function testCacheKeyOptionsSort(array $options, string $expectedKey): void
     {
-        $this->getCache()
-            ->expects(self::once())
-            ->method('getItem')
-            ->with($expectedKey);
+        $this->getCache()->expects(self::once())->method('getItem')->with($expectedKey);
+        $this->getReadConfig()->method('getOptions')->willReturn($options);
 
-        $this->getReadConfig()
-            ->method('getOptions')
-            ->willReturn($options);
-
-        $this->getReadConfig()
-            ->expects(self::once())
+        $this->getReadConfig()->expects(self::once())
             ->method('withTag')
             ->with('messages')
             ->willReturnSelf();
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
-            'download locale' => function (string $method, string $url, array $options = []): ResponseInterface {
+            'download locale' => function (string $method): ResponseInterface {
                 $this->assertSame('GET', $method);
 
                 return new MockResponse('', ['http_code' => 200, 'response_headers' => [
@@ -363,6 +334,68 @@ class PhraseProviderTest extends TestCase
         ]), endpoint: 'api.phrase.com/api/v2');
 
         $provider->read(['messages'], ['en_GB']);
+    }
+
+    /**
+     * @dataProvider cacheItemProvider
+     */
+    public function testGetCacheItem(mixed $cachedValue, bool $hasMatchHeader): void
+    {
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->expects(self::once())->method('isHit')->willReturn(true);
+        $item->method('get')->willReturn($cachedValue);
+
+        $this->getCache()
+            ->expects(self::once())
+            ->method('getItem')
+            ->willReturn($item);
+
+        $responses = [
+            'init locales' => $this->getInitLocaleResponseMock(),
+            'download locale' => function ($method, $url, $options) use ($hasMatchHeader) {
+                if ($hasMatchHeader) {
+                    $this->assertArrayHasKey('if-none-match', $options['normalized_headers']);
+                } else {
+                    $this->assertArrayNotHasKey('if-none-match', $options['normalized_headers']);
+                }
+
+                return new MockResponse('', ['http_code' => 200, 'response_headers' => [
+                    'ETag' => 'W/"625d11cf081b1697cbc216edf6ebb13c"',
+                    'Last-Modified' => 'Wed, 28 Dec 2022 13:16:45 GMT',
+                ]]);
+            },
+        ];
+
+        $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
+            'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
+            'headers' => [
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
+            ],
+        ]), endpoint: 'api.phrase.com/api/v2');
+
+        $provider->read(['messages'], ['en_GB']);
+    }
+
+    public function cacheItemProvider(): \Generator
+    {
+        yield 'null value' => [
+            'cached_value' => null,
+            'has_header' => false,
+        ];
+
+        yield 'wrong value' => [
+            'cached_value' => new \stdClass(),
+            'has_header' => false,
+        ];
+
+        $item = $this->createMock(PhraseCachedResponse::class);
+        $item->expects(self::once())->method('getEtag')->willReturn('W\Foo');
+
+        yield 'correct value' => [
+            'cached_value' => $item,
+            'has_header' => true,
+        ];
     }
 
     public function testTranslatorBagAssert(): void
