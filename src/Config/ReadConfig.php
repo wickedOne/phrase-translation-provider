@@ -31,7 +31,7 @@ use Symfony\Component\Translation\Provider\Dsn;
  * }
  * @phpstan-type PhraseDsnReadConfig array{
  *  file_format?: string,
- *  format_options?: array<array-key, string|mixed>,
+ *  format_options?: array<array-key, mixed>,
  *  tags?: string,
  *  tag?: string,
  *  fallback_locale_enabled?: string,

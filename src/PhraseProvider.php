@@ -69,14 +69,18 @@ class PhraseProvider implements ProviderInterface
     /**
      * @param array<array-key, mixed> $domains
      * @param array<array-key, mixed> $locales
+     *
+     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function read(array $domains, array $locales): TranslatorBag
     {
         $translatorBag = new TranslatorBag();
 
+        /** @var string $locale */
         foreach ($locales as $locale) {
             $phraseLocale = $this->getLocale($locale);
 
+            /** @var string $domain */
             foreach ($domains as $domain) {
                 $this->readConfig->withTag($domain);
 
@@ -100,6 +104,7 @@ class PhraseProvider implements ProviderInterface
                     $this->throwProviderException($statusCode, $response, 'Unable to get translations from phrase.');
                 }
 
+                /** @var string $content */
                 $content = 304 === $statusCode ? $item->get()->getContent() : $response->getContent();
                 $translatorBag->addCatalogue($this->loader->load($content, $locale, $domain));
 
@@ -129,6 +134,7 @@ class PhraseProvider implements ProviderInterface
         $catalogues = $event->getBag()->getCatalogues();
 
         foreach ($catalogues as $catalogue) {
+            /** @var string $domain */
             foreach ($catalogue->getDomains() as $domain) {
                 if (0 === \count($catalogue->all($domain))) {
                     continue;
@@ -161,6 +167,7 @@ class PhraseProvider implements ProviderInterface
     {
         $defaultCatalogue = $translatorBag->getCatalogue($this->defaultLocale);
 
+        /** @var string $domain */
         foreach ($defaultCatalogue->getDomains() as $domain) {
             if ([] === $keys = array_keys($defaultCatalogue->all($domain))) {
                 continue;
@@ -251,6 +258,7 @@ class PhraseProvider implements ProviderInterface
             $this->throwProviderException($statusCode, $response, 'Unable to get locales from phrase.');
         }
 
+        /** @var PhraseLocale $phraseLocale */
         foreach ($response->toArray() as $phraseLocale) {
             self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale;
         }
