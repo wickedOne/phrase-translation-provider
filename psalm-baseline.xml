@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="5.4.0@62db5d4f6a7ae0a20f7cc5a4952d730272fc0863">
+  <file src="src/Config/ReadConfig.php">
+    <MixedArgument occurrences="1">
+      <code>$options['format_options'] ?? []</code>
+    </MixedArgument>
+  </file>
+  <file src="src/PhraseProvider.php">
+    <MixedArgument occurrences="7">
+      <code>$content</code>
+      <code>$domain</code>
+      <code>$domain</code>
+      <code>$domain</code>
+      <code>$domain</code>
+      <code>$locale</code>
+      <code>$phraseLocale['code']</code>
+    </MixedArgument>
+    <MixedArgumentTypeCoercion occurrences="1">
+      <code>$v</code>
+    </MixedArgumentTypeCoercion>
+    <MixedArrayAccess occurrences="1">
+      <code>$phraseLocale['code']</code>
+    </MixedArrayAccess>
+    <MixedAssignment occurrences="7">
+      <code>$content</code>
+      <code>$domain</code>
+      <code>$domain</code>
+      <code>$domain</code>
+      <code>$locale</code>
+      <code>$phraseLocale</code>
+      <code>self::$phraseLocales[$this-&gt;toSymfonyLocale($phraseLocale['code'])]</code>
+    </MixedAssignment>
+    <MixedMethodCall occurrences="2">
+      <code>getContent</code>
+      <code>getEtag</code>
+    </MixedMethodCall>
+    <MixedPropertyTypeCoercion occurrences="1">
+      <code>self::$phraseLocales</code>
+    </MixedPropertyTypeCoercion>
+  </file>
+  <file src="src/PhraseProviderFactory.php">
+    <PossiblyNullOperand occurrences="1">
+      <code>$dsn-&gt;getPort()</code>
+    </PossiblyNullOperand>
+  </file>
+</files>

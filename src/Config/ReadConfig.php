@@ -17,8 +17,24 @@ use Symfony\Component\Translation\Provider\Dsn;
 /**
  * @phpstan-type PhraseReadConfig array{
  *  file_format: string,
- *  format_options: array<string, string>,
+ *  format_options: array<array-key, string>,
  *  tags: string,
+ *  fallback_locale_id?: string,
+ *  branch?: string,
+ *  include_empty_translations?: string,
+ *  exclude_empty_zero_forms?: string,
+ *  include_translated_keys?: string,
+ *  keep_notranslate_tags?: string,
+ *  encoding?: string,
+ *  include_unverified_translations?: string,
+ *  use_last_reviewed_version?: string,
+ * }
+ * @phpstan-type PhraseDsnReadConfig array{
+ *  file_format?: string,
+ *  format_options?: array<array-key, string|mixed>,
+ *  tags?: string,
+ *  tag?: string,
+ *  fallback_locale_enabled?: string,
  *  fallback_locale_id?: string,
  *  branch?: string,
  *  include_empty_translations?: string,
@@ -81,6 +97,7 @@ class ReadConfig
 
     public static function fromDsn(Dsn $dsn): self
     {
+        /** @var PhraseDsnReadConfig&array $options */
         $options = $dsn->getOptions()['read'] ?? [];
         $fallbackLocale = $options['fallback_locale_enabled'] ?? '0';
 
