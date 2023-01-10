@@ -169,6 +169,7 @@ class PhraseProvider implements ProviderInterface
 
         /** @var string $domain */
         foreach ($defaultCatalogue->getDomains() as $domain) {
+            /** @var string[] $keys */
             if ([] === $keys = array_keys($defaultCatalogue->all($domain))) {
                 continue;
             }
