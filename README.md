@@ -96,19 +96,19 @@ see tables below for available options and, if applicable, their default values.
 
 in order to read translations from phrase the [download locale](https://developers.phrase.com/api/#get-/projects/-project_id-/locales/-id-/download) call is made to the phrase api. this call provides the following options.
 
-| name                              |   type   |   default value    | comment                                                                             |
-|-----------------------------------|:--------:|:------------------:|-------------------------------------------------------------------------------------|
-| `branch`                          |  string  |                    |                                                                                     |
-| `include_empty_translations`      |   bool   |         1          |                                                                                     |
-| _`exclude_empty_zero_forms`_      |   bool   |                    |                                                                                     |
-| `include_translated_keys`         |   bool   |                    |                                                                                     |
-| `keep_notranslate_tags`           |   bool   |                    |                                                                                     |
-| `format_options`                  |  array   |  enclose_in_cdata  |                                                                                     |                                                                                     |
-| `encoding`                        |  string  |                    |                                                                                     |                                                                                     |
-| `skip_unverified_translations`    |   bool   |                    |                                                                                     |                                                                                     |
-| `include_unverified_translations` |   bool   |                    |                                                                                     |                                                                                     |
-| `use_last_reviewed_version`       |   bool   |                    |                                                                                     |                                                                                     |
-| `fallback_locale_enabled`         |   bool   |         0          | when the fallback locale is enabled, caching responses from phrase will be disabled |
+| name                              |  type  |  default value   | comment                                                                             |
+|-----------------------------------|:------:|:----------------:|-------------------------------------------------------------------------------------|
+| `branch`                          | string |                  |                                                                                     |
+| `include_empty_translations`      |  bool  |        1         |                                                                                     |
+| `exclude_empty_zero_forms`        |  bool  |                  |                                                                                     |
+| `include_translated_keys`         |  bool  |                  |                                                                                     |
+| `keep_notranslate_tags`           |  bool  |                  |                                                                                     |
+| `format_options`                  | array  | enclose_in_cdata |                                                                                     |                                                                                     |
+| `encoding`                        | string |                  |                                                                                     |                                                                                     |
+| `skip_unverified_translations`    |  bool  |                  |                                                                                     |                                                                                     |
+| `include_unverified_translations` |  bool  |                  |                                                                                     |                                                                                     |
+| `use_last_reviewed_version`       |  bool  |                  |                                                                                     |                                                                                     |
+| `fallback_locale_enabled`         |  bool  |        0         | when the fallback locale is enabled, caching responses from phrase will be disabled |
 
 ### write
 
