@@ -313,6 +313,8 @@ class PhraseProviderTest extends TestCase
             ->with('messages')
             ->willReturnSelf();
 
+        $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
+
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
             'download locale' => function (string $method): ResponseInterface {
@@ -349,6 +351,8 @@ class PhraseProviderTest extends TestCase
             ->expects(self::once())
             ->method('getItem')
             ->willReturn($item);
+
+        $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
@@ -509,6 +513,8 @@ class PhraseProviderTest extends TestCase
     public function testCreateUnknownLocale(): void
     {
         $this->readConfigWithDefaultValues('messages');
+
+        $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
@@ -745,6 +751,10 @@ class PhraseProviderTest extends TestCase
             ->expects(self::once())
             ->method('error')
             ->with($expectedLoggerMessage);
+
+        $this->getXliffFileDumper()
+            ->method('formatCatalogue')
+            ->willReturn('');
 
         $responses = [
             'init locales' => $this->getInitLocaleResponseMock(),
