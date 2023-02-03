@@ -28,8 +28,7 @@
         "symfony/http-client": "^5.4.16|^6.0",
         "symfony/mime": "^5.4.16|^6.0",
         "symfony/translation": "^5.4.16|^6.0"
-    }
-    ,
+    },
     "require-dev": {
         "infection/infection": "^0.26.18",
         "phpstan/phpstan": "^1.9.14",

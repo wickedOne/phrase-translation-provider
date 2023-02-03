@@ -64,7 +64,7 @@ if you define a locale in your `translation.yaml` which is not configured in you
 ## domains as tags
 
 translations will be tagged in phrase with the symfony translation domain they belong to.
-check the [wickedone/phrase-translation-bundle](https://github.com/wickedOne/phrase-translation-bundle) if you need help managing your tags in phrase 
+check the [wickedone/phrase-tag-bundle](https://github.com/wickedOne/phrase-tag-bundle) if you need help managing your tags in phrase 
 
 ## cache
 
