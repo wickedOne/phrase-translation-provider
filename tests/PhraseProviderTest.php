@@ -510,6 +510,63 @@ class PhraseProviderTest extends TestCase
         $provider->read(['messages'], ['en_GB']);
     }
 
+    public function testInitLocalesPaginated(): void
+    {
+        $this->readConfigWithDefaultValues('messages');
+
+        $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
+
+        $responses = [
+            'init locales page 1' => function (string $method, string $url): ResponseInterface {
+                $this->assertSame('GET', $method);
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales?per_page=100&page=1', $url);
+
+                return new MockResponse(json_encode([
+                    [
+                        'id' => '5fea6ed5c21767730918a9400e420832',
+                        'name' => 'de',
+                        'code' => 'de',
+                        'fallback_locale' => null,
+                    ],
+                ], \JSON_THROW_ON_ERROR), [
+                    'http_code' => 200,
+                    'response_headers' => [
+                        'pagination' => '{"total_count":31,"current_page":1,"current_per_page":25,"previous_page":null,"next_page":2}',
+                    ],
+                ]);
+            },
+            'init locales page 2' => function (string $method, string $url): ResponseInterface {
+                $this->assertSame('GET', $method);
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales?per_page=100&page=2', $url);
+
+                return new MockResponse(json_encode([
+                    [
+                        'id' => '5fea6ed5c21767730918a9400e420832',
+                        'name' => 'de',
+                        'code' => 'de',
+                        'fallback_locale' => null,
+                    ],
+                ], \JSON_THROW_ON_ERROR), [
+                    'http_code' => 200,
+                    'response_headers' => [
+                        'pagination' => '{"total_count":31,"current_page":2,"current_per_page":25,"previous_page":null,"next_page":null}',
+                    ],
+                ]);
+            },
+            'download locale' => $this->getDownloadLocaleResponseMock('messages', '5fea6ed5c21767730918a9400e420832', ''),
+        ];
+
+        $provider = $this->createProvider(httpClient: (new MockHttpClient($responses))->withOptions([
+            'base_uri' => 'https://api.phrase.com/api/v2/projects/1/',
+            'headers' => [
+                'Authorization' => 'token API_TOKEN',
+                'User-Agent' => 'myProject',
+            ],
+        ]), endpoint: 'api.phrase.com/api/v2');
+
+        $provider->read(['messages'], ['de']);
+    }
+
     public function testCreateUnknownLocale(): void
     {
         $this->readConfigWithDefaultValues('messages');
@@ -523,11 +580,11 @@ class PhraseProviderTest extends TestCase
                 $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales', $url);
                 $this->assertSame('Content-Type: application/x-www-form-urlencoded', $options['normalized_headers']['content-type'][0]);
                 $this->assertArrayHasKey('body', $options);
-                $this->assertSame('name=nl_NL&code=nl-NL', $options['body']);
+                $this->assertSame('name=nl-NL&code=nl-NL&default=0', $options['body']);
 
                 return new MockResponse(json_encode([
                     'id' => 'zWlsCvkeSK0EBgBVmGpZ4cySWbQ0s1Dk4',
-                    'name' => 'nl_NL',
+                    'name' => 'nl-NL',
                     'code' => 'nl-NL',
                     'fallback_locale' => null,
                 ], \JSON_THROW_ON_ERROR), ['http_code' => 201]);
@@ -950,7 +1007,7 @@ XLIFF;
     {
         return $this->getExceptionResponses(
             exceptionMessage: 'Unable to create locale phrase.',
-            loggerMessage: 'Unable to create locale "nl_NL" in phrase: "provider error".'
+            loggerMessage: 'Unable to create locale "nl-NL" in phrase: "provider error".'
         );
     }
 
@@ -1127,7 +1184,7 @@ XLIFF,
     {
         return function (string $method, string $url): ResponseInterface {
             $this->assertSame('GET', $method);
-            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales', $url);
+            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales?per_page=100&page=1', $url);
 
             return new MockResponse(json_encode([
                 [
@@ -1138,7 +1195,7 @@ XLIFF,
                 ],
                 [
                     'id' => '13604ec993beefcdaba732812cdb828c',
-                    'name' => 'en',
+                    'name' => 'en-GB',
                     'code' => 'en-GB',
                     'fallback_locale' => [
                         'id' => '5fea6ed5c21767730918a9400e420832',
