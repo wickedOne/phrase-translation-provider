@@ -165,29 +165,30 @@ class PhraseProvider implements ProviderInterface
 
     public function delete(TranslatorBagInterface $translatorBag): void
     {
-        $defaultCatalogue = $translatorBag->getCatalogue($this->defaultLocale);
+        $keys = [[]];
 
-        /** @var string $domain */
-        foreach ($defaultCatalogue->getDomains() as $domain) {
-            /** @var string[] $keys */
-            if ([] === $keys = array_keys($defaultCatalogue->all($domain))) {
-                continue;
+        foreach ($translatorBag->getCatalogues() as $catalogue) {
+            /** @var string $domain */
+            foreach ($catalogue->getDomains() as $domain) {
+                /* @var string[] $keys */
+                $keys[] = array_keys($catalogue->all($domain));
             }
+        }
 
-            $names = array_map(static fn ($v): ?string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
+        $keys = array_unique(array_merge(...$keys));
+        $names = array_map(static fn ($v): ?string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
 
-            foreach ($names as $name) {
-                $response = $this->httpClient->request('DELETE', 'keys', [
-                    'query' => [
-                        'q' => 'name:' . $name,
-                    ],
-                ]);
+        foreach ($names as $name) {
+            $response = $this->httpClient->request('DELETE', 'keys', [
+                'query' => [
+                    'q' => 'name:' . $name,
+                ],
+            ]);
 
-                if (200 !== $statusCode = $response->getStatusCode()) {
-                    $this->logger->error(sprintf('Unable to delete key "%s" in phrase: "%s".', $name, $response->getContent(false)));
+            if (200 !== $statusCode = $response->getStatusCode()) {
+                $this->logger->error(sprintf('Unable to delete key "%s" in phrase: "%s".', $name, $response->getContent(false)));
 
-                    $this->throwProviderException($statusCode, $response, 'Unable to delete key in phrase.');
-                }
+                $this->throwProviderException($statusCode, $response, 'Unable to delete key in phrase.');
             }
         }
     }
