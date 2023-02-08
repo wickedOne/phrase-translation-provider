@@ -592,11 +592,28 @@ class PhraseProviderTest extends TestCase
             ],
         ]));
 
+        $bag->addCatalogue(new MessageCatalogue('de', [
+            'validators' => [],
+            'messages' => [
+                'another:erroneous:key' => 'value to delete',
+                'delete this,erroneous:key' => 'translated value',
+            ],
+        ]));
+
         $responses = [
-            'delete key' => function (string $method, string $url): ResponseInterface {
+            'delete key one' => function (string $method, string $url): ResponseInterface {
                 $this->assertSame('DELETE', $method);
                 // https://api.phrase.com/api/v2/projects/1/keys?q=name:delete\\ this\\,erroneous\\:key
                 $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?q=name%3Adelete%5C%5C%20this%5C%5C%2Cerroneous%5C%5C%3Akey', $url);
+
+                return new MockResponse('', [
+                    'http_code' => 200,
+                ]);
+            },
+            'delete key two' => function (string $method, string $url): ResponseInterface {
+                $this->assertSame('DELETE', $method);
+                // 'https://api.phrase.com/api/v2/projects/1/keys?q=name:another\\:erroneous\\:key'
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?q=name%3Aanother%5C%5C%3Aerroneous%5C%5C%3Akey', $url);
 
                 return new MockResponse('', [
                     'http_code' => 200,
