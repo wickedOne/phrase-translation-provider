@@ -223,16 +223,20 @@ class PhraseProvider implements ProviderInterface
             $this->initLocales();
         }
 
-        if (!\array_key_exists($locale, self::$phraseLocales)) {
-            $this->createLocale($locale);
+        $phraseCode = $this->toPhraseLocale($locale);
+
+        if (!\array_key_exists($phraseCode, self::$phraseLocales)) {
+            $this->createLocale($phraseCode);
         }
 
-        return self::$phraseLocales[$locale]['id'];
+        return self::$phraseLocales[$phraseCode]['id'];
     }
 
     private function getFallbackLocale(string $locale): ?string
     {
-        return self::$phraseLocales[$locale]['fallback_locale']['code'] ?? null;
+        $phraseLocale = $this->toPhraseLocale($locale);
+
+        return self::$phraseLocales[$phraseLocale]['fallback_locale']['name'] ?? null;
     }
 
     private function createLocale(string $locale): void
@@ -240,7 +244,8 @@ class PhraseProvider implements ProviderInterface
         $response = $this->httpClient->request('POST', 'locales', [
             'body' => [
                 'name' => $locale,
-                'code' => $this->toPhraseLocale($locale),
+                'code' => $locale,
+                'default' => $locale === $this->toPhraseLocale($this->defaultLocale),
             ],
             'headers' => [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -256,23 +261,37 @@ class PhraseProvider implements ProviderInterface
         /** @var PhraseLocale $phraseLocale */
         $phraseLocale = $response->toArray();
 
-        self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale;
+        self::$phraseLocales[$phraseLocale['name']] = $phraseLocale;
     }
 
     private function initLocales(): void
     {
-        $response = $this->httpClient->request('GET', 'locales');
+        $page = 1;
 
-        if (200 !== $statusCode = $response->getStatusCode()) {
-            $this->logger->error(sprintf('Unable to get locales from phrase: "%s".', $response->getContent(false)));
+        do {
+            $response = $this->httpClient->request('GET', 'locales', [
+                'query' => [
+                    'per_page' => 100,
+                    'page' => $page,
+                ],
+            ]);
 
-            $this->throwProviderException($statusCode, $response, 'Unable to get locales from phrase.');
-        }
+            if (200 !== $statusCode = $response->getStatusCode()) {
+                $this->logger->error(sprintf('Unable to get locales from phrase: "%s".', $response->getContent(false)));
 
-        /** @var PhraseLocale $phraseLocale */
-        foreach ($response->toArray() as $phraseLocale) {
-            self::$phraseLocales[$this->toSymfonyLocale($phraseLocale['code'])] = $phraseLocale;
-        }
+                $this->throwProviderException($statusCode, $response, 'Unable to get locales from phrase.');
+            }
+
+            /** @var PhraseLocale $phraseLocale */
+            foreach ($response->toArray() as $phraseLocale) {
+                self::$phraseLocales[$phraseLocale['name']] = $phraseLocale;
+            }
+
+            $pagination = $response->getHeaders()['pagination'][0] ?? '{}';
+
+            /** @psalm-suppress MixedAssignment */
+            $page = json_decode($pagination, true)['next_page'] ?? null;
+        } while (null !== $page);
     }
 
     private function throwProviderException(int $statusCode, ResponseInterface $response, string $message): void
@@ -287,11 +306,6 @@ class PhraseProvider implements ProviderInterface
             $statusCode <= 500 => new ProviderException($message, $response),
             default => new ProviderException('Provider server error.', $response),
         };
-    }
-
-    private function toSymfonyLocale(string $locale): string
-    {
-        return str_replace('-', '_', $locale);
     }
 
     private function toPhraseLocale(string $locale): string
