@@ -57,6 +57,12 @@ framework:
                 locales: ~
 ```
 
+## phrase locale names
+
+translations being imported using the symfony xlf format in phrase, locales are matched on locale name in phrase.
+therefor it's necessary the locale names should be as defined in [RFC4646](https://www.ietf.org/rfc/rfc4646.txt) (e.g. pt-BR rather than pt_BR).
+not doing so will result in phrase creating a new locale for the imported keys.
+
 ## locale creation
 
 if you define a locale in your `translation.yaml` which is not configured in your phrase project, it will be automatically created. deletion of locales however, is (currently) not managed by this provider.
