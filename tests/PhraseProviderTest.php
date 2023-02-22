@@ -18,6 +18,7 @@ use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpClient\HttpClientTrait;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Translation\Bridge\Phrase\Cache\PhraseCachedResponse;
@@ -44,6 +45,10 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 class PhraseProviderTest extends TestCase
 {
+    use HttpClientTrait {
+        mergeQueryString as public;
+    }
+
     private MockHttpClient $httpClient;
     private MockObject&LoggerInterface $logger;
     private MockObject&LoaderInterface $loader;
@@ -277,8 +282,10 @@ class PhraseProviderTest extends TestCase
                     'fallback_locale_id' => 'de',
                 ];
 
+                $queryString = $this->mergeQueryString(null, $query, true);
+
                 $this->assertSame('GET', $method);
-                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . http_build_query($query), $url);
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . $queryString, $url);
                 $this->assertNotContains('If-None-Match: W/"625d11cf081b1697cbc216edf6ebb13c"', $options['headers']);
                 $this->assertArrayHasKey('query', $options);
                 $this->assertSame($query, $options['query']);
@@ -660,17 +667,18 @@ class PhraseProviderTest extends TestCase
         $responses = [
             'delete key one' => function (string $method, string $url): ResponseInterface {
                 $this->assertSame('DELETE', $method);
-                // https://api.phrase.com/api/v2/projects/1/keys?q=name:delete\\ this\\,erroneous\\:key
-                $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?q=name%3Adelete%5C%5C%20this%5C%5C%2Cerroneous%5C%5C%3Akey', $url);
+                $queryString = $this->mergeQueryString(null, ['q' => 'name:delete\\\\ this\\\\,erroneous\\\\:key'], true);
+
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?' . $queryString, $url);
 
                 return new MockResponse('', [
                     'http_code' => 200,
                 ]);
             },
             'delete key two' => function (string $method, string $url): ResponseInterface {
-                $this->assertSame('DELETE', $method);
-                // 'https://api.phrase.com/api/v2/projects/1/keys?q=name:another\\:erroneous\\:key'
-                $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?q=name%3Aanother%5C%5C%3Aerroneous%5C%5C%3Akey', $url);
+                $queryString = $this->mergeQueryString(null, ['q' => 'name:another\\\\:erroneous\\\\:key'], true);
+
+                $this->assertSame('https://api.phrase.com/api/v2/projects/1/keys?' . $queryString, $url);
 
                 return new MockResponse('', [
                     'http_code' => 200,
@@ -1168,8 +1176,10 @@ XLIFF,
                 ],
             ];
 
+            $queryString = $this->mergeQueryString(null, $query, true);
+
             $this->assertSame('GET', $method);
-            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . http_build_query($query), $url);
+            $this->assertSame('https://api.phrase.com/api/v2/projects/1/locales/' . $localeId . '/download?' . $queryString, $url);
             $this->assertArrayHasKey('query', $options);
             $this->assertSame($query, $options['query']);
 

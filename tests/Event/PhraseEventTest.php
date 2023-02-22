@@ -14,6 +14,7 @@ namespace Symfony\Component\Translation\Bridge\Phrase\Tests\Event;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\Bridge\Phrase\Event\PhraseReadEvent;
+use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\TranslatorBag;
 
 /**
@@ -23,15 +24,12 @@ class PhraseEventTest extends TestCase
 {
     public function testSetAndGetBag(): void
     {
-        $bagOne = new TranslatorBag();
-        $bagTwo = new TranslatorBag();
+        $event = new PhraseReadEvent(new TranslatorBag());
 
-        $event = new PhraseReadEvent($bagOne);
+        $bag = $event->getBag();
+        $catalogue = new MessageCatalogue('de');
+        $bag->addCatalogue($catalogue);
 
-        $this->assertSame($bagOne, $event->getBag());
-
-        $event->setBag($bagTwo);
-
-        $this->assertSame($bagTwo, $event->getBag());
+        $this->assertSame($catalogue, $event->getBag()->getCatalogue('de'));
     }
 }

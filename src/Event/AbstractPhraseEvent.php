@@ -21,17 +21,12 @@ use Symfony\Contracts\EventDispatcher\Event;
 abstract class AbstractPhraseEvent extends Event
 {
     public function __construct(
-        private TranslatorBag $bag
+        private readonly TranslatorBag $bag
     ) {
     }
 
     public function getBag(): TranslatorBag
     {
         return $this->bag;
-    }
-
-    public function setBag(TranslatorBag $bag): void
-    {
-        $this->bag = $bag;
     }
 }
