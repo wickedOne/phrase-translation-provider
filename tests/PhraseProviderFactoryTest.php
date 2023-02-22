@@ -118,7 +118,7 @@ class PhraseProviderFactoryTest extends TestCase
             ->create($dsn);
     }
 
-    public function createProvider(): \Generator
+    public static function createProvider(): \Generator
     {
         yield 'default datacenter' => [
             'phrase://api.phrase.com',
@@ -131,17 +131,17 @@ class PhraseProviderFactoryTest extends TestCase
         ];
     }
 
-    public function incompleteDsnProvider(): \Generator
+    public static function incompleteDsnProvider(): \Generator
     {
         yield ['phrase://default', 'Invalid "phrase://default" provider DSN: User is not set.'];
     }
 
-    public function unsupportedSchemeProvider(): \Generator
+    public static function unsupportedSchemeProvider(): \Generator
     {
         yield ['unsupported://API_TOKEN@default', 'The "unsupported" scheme is not supported; supported schemes for translation provider "phrase" are: "phrase".'];
     }
 
-    private function supportsProvider(): \Generator
+    public static function supportsProvider(): \Generator
     {
         yield 'supported' => [true, 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject'];
         yield 'not supported' => [false, 'unsupported://PROJECT_ID:API_TOKEN@default?userAgent=myProject'];
