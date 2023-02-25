@@ -26,7 +26,7 @@
         "psr/event-dispatcher": "^1.0",
         "symfony/event-dispatcher-contracts": "^3.2",
         "symfony/http-client": "6.2.6",
-        "symfony/mime": "5.4.19",
+        "symfony/mime": "6.2.5",
         "symfony/translation": "6.2.5"
     },
     "require-dev": {
