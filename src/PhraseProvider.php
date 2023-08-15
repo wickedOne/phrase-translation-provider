@@ -175,6 +175,7 @@ class PhraseProvider implements ProviderInterface
             }
         }
 
+        /** @var array<array-key, string> $keys */
         $keys = array_unique(array_merge(...$keys));
         $names = array_map(static fn ($v): ?string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
 
