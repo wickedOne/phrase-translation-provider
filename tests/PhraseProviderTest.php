@@ -312,7 +312,10 @@ class PhraseProviderTest extends TestCase
      */
     public function testCacheKeyOptionsSort(array $options, string $expectedKey): void
     {
-        $this->getCache()->expects(self::once())->method('getItem')->with($expectedKey);
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->method('set')->willReturnSelf();
+
+        $this->getCache()->expects(self::once())->method('getItem')->with($expectedKey)->willReturn($item);
         $this->getReadConfig()->method('getOptions')->willReturn($options);
 
         $this->getReadConfig()->expects(self::once())
@@ -519,6 +522,10 @@ class PhraseProviderTest extends TestCase
 
     public function testInitLocalesPaginated(): void
     {
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->method('set')->willReturnSelf();
+        $this->getCache()->method('getItem')->willReturn($item);
+
         $this->readConfigWithDefaultValues('messages');
 
         $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
@@ -576,6 +583,10 @@ class PhraseProviderTest extends TestCase
 
     public function testCreateUnknownLocale(): void
     {
+        $item = $this->createMock(CacheItemInterface::class);
+        $item->method('set')->willReturnSelf();
+        $this->getCache()->method('getItem')->willReturn($item);
+
         $this->readConfigWithDefaultValues('messages');
 
         $this->getLoader()->method('load')->willReturn(new MessageCatalogue('en'));
