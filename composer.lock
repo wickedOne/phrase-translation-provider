@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d6a4315d2c5ca9dc00703fd88ea0b51",
+    "content-hash": "31ba490644336fb5005237e13304a466",
     "packages": [
         {
             "name": "psr/cache",
@@ -2092,16 +2092,16 @@
         },
         {
             "name": "infection/infection",
-            "version": "0.27.4",
+            "version": "0.27.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/infection/infection.git",
-                "reference": "2789fdd689689b0c85f2c0ae9db50c8d2b39fb92"
+                "reference": "6e64b856c9f4f735e50b7ced02a6fc8236b0a1d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/infection/infection/zipball/2789fdd689689b0c85f2c0ae9db50c8d2b39fb92",
-                "reference": "2789fdd689689b0c85f2c0ae9db50c8d2b39fb92",
+                "url": "https://api.github.com/repos/infection/infection/zipball/6e64b856c9f4f735e50b7ced02a6fc8236b0a1d8",
+                "reference": "6e64b856c9f4f735e50b7ced02a6fc8236b0a1d8",
                 "shasum": ""
             },
             "require": {
@@ -2208,7 +2208,7 @@
             ],
             "support": {
                 "issues": "https://github.com/infection/infection/issues",
-                "source": "https://github.com/infection/infection/tree/0.27.4"
+                "source": "https://github.com/infection/infection/tree/0.27.5"
             },
             "funding": [
                 {
@@ -2220,7 +2220,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2023-10-09T12:03:22+00:00"
+            "time": "2023-10-15T20:29:39+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
