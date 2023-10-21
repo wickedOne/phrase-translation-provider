@@ -25,9 +25,9 @@
         "psr/cache": "^3.0",
         "psr/event-dispatcher": "^1.0",
         "symfony/event-dispatcher-contracts": "^3.3.0",
-        "symfony/http-client": "6.3.5",
+        "symfony/http-client": "6.3.6",
         "symfony/mime": "6.3.5",
-        "symfony/translation": "6.3.3"
+        "symfony/translation": "6.3.6"
     },
     "require-dev": {
         "infection/infection": "^0.27.6",
