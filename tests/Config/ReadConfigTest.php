@@ -90,7 +90,7 @@ class ReadConfigTest extends TestCase
         $this->assertFalse($config->isFallbackLocaleEnabled());
     }
 
-    public function dsnOptionsProvider(): \Generator
+    public static function dsnOptionsProvider(): \Generator
     {
         yield 'default options' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject',

@@ -422,7 +422,7 @@ class PhraseProviderTest extends TestCase
         $provider->write($trans);
     }
 
-    public function cacheKeyProvider(): \Generator
+    public static function cacheKeyProvider(): \Generator
     {
         yield 'sortorder one' => [
             'options' => [
@@ -878,7 +878,7 @@ class PhraseProviderTest extends TestCase
         $provider->write($bag);
     }
 
-    public function writeProvider(): \Generator
+    public static function writeProvider(): \Generator
     {
         $expectedEnglishXliff = <<<'XLIFF'
 <?xml version="1.0" encoding="utf-8"?>
@@ -999,9 +999,9 @@ XLIFF;
     /**
      * @return array<string, ExceptionDefinition>
      */
-    public function deleteExceptionsProvider(): array
+    public static function deleteExceptionsProvider(): array
     {
-        return $this->getExceptionResponses(
+        return self::getExceptionResponses(
             exceptionMessage: 'Unable to delete key in phrase.',
             loggerMessage: 'Unable to delete key "key.to.delete" in phrase: "provider error".',
             statusCode: 500
@@ -1011,9 +1011,9 @@ XLIFF;
     /**
      * @return array<string, ExceptionDefinition>
      */
-    public function writeExceptionsProvider(): array
+    public static function writeExceptionsProvider(): array
     {
-        return $this->getExceptionResponses(
+        return self::getExceptionResponses(
             exceptionMessage: 'Unable to upload translations to phrase.',
             loggerMessage: 'Unable to upload translations for domain "messages" to phrase: "provider error".'
         );
@@ -1022,9 +1022,9 @@ XLIFF;
     /**
      * @return array<string, ExceptionDefinition>
      */
-    public function createLocalesExceptionsProvider(): array
+    public static function createLocalesExceptionsProvider(): array
     {
-        return $this->getExceptionResponses(
+        return self::getExceptionResponses(
             exceptionMessage: 'Unable to create locale phrase.',
             loggerMessage: 'Unable to create locale "nl-NL" in phrase: "provider error".'
         );
@@ -1033,9 +1033,9 @@ XLIFF;
     /**
      * @return array<string, ExceptionDefinition>
      */
-    public function initLocalesExceptionsProvider(): array
+    public static function initLocalesExceptionsProvider(): array
     {
-        return $this->getExceptionResponses(
+        return self::getExceptionResponses(
             exceptionMessage: 'Unable to get locales from phrase.',
             loggerMessage: 'Unable to get locales from phrase: "provider error".'
         );
@@ -1044,15 +1044,15 @@ XLIFF;
     /**
      * @return array<string, ExceptionDefinition>
      */
-    public function readProviderExceptionsProvider(): array
+    public static function readProviderExceptionsProvider(): array
     {
-        return $this->getExceptionResponses(
+        return self::getExceptionResponses(
             exceptionMessage: 'Unable to get translations from phrase.',
             loggerMessage: 'Unable to get translations for locale "en_GB" from phrase: "provider error".'
         );
     }
 
-    public function readProvider(): \Generator
+    public static function readProvider(): \Generator
     {
         $bag = new TranslatorBag();
         $catalogue = new MessageCatalogue('en_GB', [
@@ -1154,7 +1154,7 @@ XLIFF,
     /**
      * @return array<string, ExceptionDefinition>
      */
-    private function getExceptionResponses(string $exceptionMessage, string $loggerMessage, int $statusCode = 400): array
+    private static function getExceptionResponses(string $exceptionMessage, string $loggerMessage, int $statusCode = 400): array
     {
         return [
             'bad request' => [
