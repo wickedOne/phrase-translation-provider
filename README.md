@@ -10,6 +10,9 @@ symfony phrase translation provider bridge
 [![license](http://poser.pugx.org/wickedone/phrase-translation-provider/license)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 [![php](http://poser.pugx.org/wickedone/phrase-translation-provider/require/php)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 
+> :warning: this translation provider [has been integrated](https://github.com/symfony/phrase-translation-provider) into symfony starting at version 6.4.
+> this repository will be archived once [lts expires](https://symfony.com/releases/5.4) for symfony 5.4
+
 ## installation
 
 ```bash

@@ -70,7 +70,7 @@ class WriteConfigTest extends TestCase
         $this->assertSame($expectedOptions, $config->getOptions());
     }
 
-    public function dsnOptionsProvider(): \Generator
+    public static function dsnOptionsProvider(): \Generator
     {
         yield 'default options' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject',
