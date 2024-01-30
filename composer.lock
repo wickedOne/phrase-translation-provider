@@ -3435,12 +3435,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "cea5a32b418b44dc5a480049f531f53563c26210"
+                "reference": "44651302ebda9675677b114e39d7b9c94028a4ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/cea5a32b418b44dc5a480049f531f53563c26210",
-                "reference": "cea5a32b418b44dc5a480049f531f53563c26210",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/44651302ebda9675677b114e39d7b9c94028a4ea",
+                "reference": "44651302ebda9675677b114e39d7b9c94028a4ea",
                 "shasum": ""
             },
             "conflict": {
@@ -4158,7 +4158,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-01-24T22:04:16+00:00"
+            "time": "2024-01-30T01:24:32+00:00"
         },
         {
             "name": "sanmai/later",
