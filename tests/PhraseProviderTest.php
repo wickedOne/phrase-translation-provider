@@ -1228,7 +1228,7 @@ XLIFF,
         };
     }
 
-    private function createProvider(MockHttpClient $httpClient = null, string $endpoint = null, XliffFileDumper $dumper = null): ProviderInterface
+    private function createProvider(?MockHttpClient $httpClient = null, ?string $endpoint = null, ?XliffFileDumper $dumper = null): ProviderInterface
     {
         return new PhraseProvider(
             $httpClient ?? $this->getHttpClient(),
