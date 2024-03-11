@@ -37,7 +37,7 @@
         "phpstan/phpstan-phpunit": "^1.3.16",
         "phpunit/phpunit": "^10.5.12",
         "roave/security-advisories": "dev-latest",
-        "vimeo/psalm": "^5.23.0"
+        "vimeo/psalm": "^5.23.1"
     },
     "config": {
         "sort-packages": true,
