@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
@@ -39,9 +40,7 @@ class PhraseProviderFactoryTest extends TestCase
     private MockObject&CacheItemPoolInterface $cache;
     private string $defaultLocale;
 
-    /**
-     * @dataProvider supportsProvider
-     */
+    #[DataProvider('supportsProvider')]
     public function testSupports(bool $expected, string $dsn): void
     {
         $factory = $this->createFactory();
@@ -49,9 +48,7 @@ class PhraseProviderFactoryTest extends TestCase
         $this->assertSame($expected, $factory->supports(new Dsn($dsn)));
     }
 
-    /**
-     * @dataProvider createProvider
-     */
+    #[DataProvider('createProvider')]
     public function testCreate(string $expected, string $dsn): void
     {
         $factory = $this->createFactory();
@@ -60,9 +57,7 @@ class PhraseProviderFactoryTest extends TestCase
         $this->assertSame($expected, (string) $provider);
     }
 
-    /**
-     * @dataProvider unsupportedSchemeProvider
-     */
+    #[DataProvider('unsupportedSchemeProvider')]
     public function testUnsupportedSchemeException(string $dsn, string $message): void
     {
         $this->expectException(UnsupportedSchemeException::class);
@@ -74,9 +69,7 @@ class PhraseProviderFactoryTest extends TestCase
             ->create($dsn);
     }
 
-    /**
-     * @dataProvider incompleteDsnProvider
-     */
+    #[DataProvider('incompleteDsnProvider')]
     public function testIncompleteDsnException(string $dsn, string $message): void
     {
         $this->expectException(IncompleteDsnException::class);

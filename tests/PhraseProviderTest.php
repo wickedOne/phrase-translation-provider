@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
@@ -39,7 +40,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 /**
  * @phpstan-import-type PhraseReadConfig from ReadConfig
  *
- * @phpstan-type ExceptionDefinition array{statusCode: int, exceptionMessage: string, loggerMessage: string}
+ * @phpstan-type ExceptionDefinition array{statusCode: int, expectedExceptionMessage: string, expectedLoggerMessage: string}
  *
  * @author wicliff <wicliff.wolda@gmail.com>
  */
@@ -66,16 +67,17 @@ class PhraseProviderTest extends TestCase
     }
 
     /**
-     * @dataProvider toStringProvider
+     * @param array<string, string|array<string, string>> $providerOptions
      */
-    public function testToString(ProviderInterface $provider, string $expected): void
+    #[DataProvider('toStringProvider')]
+    public function testToString(array $providerOptions, ?string $endpoint, string $expected): void
     {
+        $provider = $this->createProvider(httpClient: $this->getHttpClient()->withOptions($providerOptions), endpoint: $endpoint);
+
         self::assertSame($expected, (string) $provider);
     }
 
-    /**
-     * @dataProvider readProvider
-     */
+    #[DataProvider('readProvider')]
     public function testRead(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
@@ -132,9 +134,7 @@ class PhraseProviderTest extends TestCase
         $this->assertSame($expectedTranslatorBag->getCatalogues(), $translatorBag->getCatalogues());
     }
 
-    /**
-     * @dataProvider readProvider
-     */
+    #[DataProvider('readProvider')]
     public function testReadCached(string $locale, string $localeId, string $domain, string $responseContent, TranslatorBag $expectedTranslatorBag): void
     {
         $item = $this->createMock(CacheItemInterface::class);
@@ -306,10 +306,9 @@ class PhraseProviderTest extends TestCase
     }
 
     /**
-     * @dataProvider cacheKeyProvider
-     *
      * @param PhraseReadConfig $options
      */
+    #[DataProvider('cacheKeyProvider')]
     public function testCacheKeyOptionsSort(array $options, string $expectedKey): void
     {
         $item = $this->createMock(CacheItemInterface::class);
@@ -348,9 +347,7 @@ class PhraseProviderTest extends TestCase
         $provider->read(['messages'], ['en_GB']);
     }
 
-    /**
-     * @dataProvider cacheItemProvider
-     */
+    #[DataProvider('cacheItemProvider')]
     public function testGetCacheItem(mixed $cachedValue, bool $hasMatchHeader): void
     {
         $item = $this->createMock(CacheItemInterface::class);
@@ -391,24 +388,23 @@ class PhraseProviderTest extends TestCase
         $provider->read(['messages'], ['en_GB']);
     }
 
-    public function cacheItemProvider(): \Generator
+    public static function cacheItemProvider(): \Generator
     {
         yield 'null value' => [
-            'cached_value' => null,
-            'has_header' => false,
+            'cachedValue' => null,
+            'hasMatchHeader' => false,
         ];
 
         yield 'wrong value' => [
-            'cached_value' => new \stdClass(),
-            'has_header' => false,
+            'cachedValue' => new \stdClass(),
+            'hasMatchHeader' => false,
         ];
 
-        $item = $this->createMock(PhraseCachedResponse::class);
-        $item->expects(self::once())->method('getEtag')->willReturn('W\Foo');
+        $item = new PhraseCachedResponse('W\Foo', 'foo', 'bar');
 
         yield 'correct value' => [
-            'cached_value' => $item,
-            'has_header' => true,
+            'cachedValue' => $item,
+            'hasMatchHeader' => true,
         ];
     }
 
@@ -433,7 +429,7 @@ class PhraseProviderTest extends TestCase
                     'enclose_in_cdata' => '1',
                 ],
             ],
-            'expected_key' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
+            'expectedKey' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
         ];
 
         yield 'sortorder two' => [
@@ -445,13 +441,11 @@ class PhraseProviderTest extends TestCase
                 ],
                 'tags' => [],
             ],
-            'expected_key' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
+            'expectedKey' => 'en_GB.messages.d8c311727922efc26536fc843bfee3e464850205',
         ];
     }
 
-    /**
-     * @dataProvider readProviderExceptionsProvider
-     */
+    #[DataProvider('readProviderExceptionsProvider')]
     public function testReadProviderExceptions(int $statusCode, string $expectedExceptionMessage, string $expectedLoggerMessage): void
     {
         $this->expectException(ProviderExceptionInterface::class);
@@ -485,9 +479,7 @@ class PhraseProviderTest extends TestCase
         $provider->read(['messages'], ['en_GB']);
     }
 
-    /**
-     * @dataProvider initLocalesExceptionsProvider
-     */
+    #[DataProvider('initLocalesExceptionsProvider')]
     public function testInitLocalesExceptions(int $statusCode, string $expectedExceptionMessage, string $expectedLoggerMessage): void
     {
         $this->expectException(ProviderExceptionInterface::class);
@@ -621,9 +613,7 @@ class PhraseProviderTest extends TestCase
         $provider->read(['messages'], ['nl_NL']);
     }
 
-    /**
-     * @dataProvider createLocalesExceptionsProvider
-     */
+    #[DataProvider('createLocalesExceptionsProvider')]
     public function testCreateLocaleExceptions(int $statusCode, string $expectedExceptionMessage, string $expectedLoggerMessage): void
     {
         $this->expectException(ProviderExceptionInterface::class);
@@ -708,9 +698,7 @@ class PhraseProviderTest extends TestCase
         $provider->delete($bag);
     }
 
-    /**
-     * @dataProvider deleteExceptionsProvider
-     */
+    #[DataProvider('deleteExceptionsProvider')]
     public function testDeleteProviderExceptions(int $statusCode, string $expectedExceptionMessage, string $expectedLoggerMessage): void
     {
         $this->expectException(ProviderExceptionInterface::class);
@@ -750,9 +738,7 @@ class PhraseProviderTest extends TestCase
         $provider->delete($bag);
     }
 
-    /**
-     * @dataProvider writeProvider
-     */
+    #[DataProvider('writeProvider')]
     public function testWrite(string $locale, string $localeId, string $domain, string $content, TranslatorBag $bag): void
     {
         $this->writeConfigWithDefaultValues($domain, $localeId);
@@ -831,9 +817,7 @@ class PhraseProviderTest extends TestCase
         $provider->write($bag);
     }
 
-    /**
-     * @dataProvider writeExceptionsProvider
-     */
+    #[DataProvider('writeExceptionsProvider')]
     public function testWriteProviderExceptions(int $statusCode, string $expectedExceptionMessage, string $expectedLoggerMessage): void
     {
         $this->expectException(ProviderExceptionInterface::class);
@@ -916,7 +900,7 @@ XLIFF;
             'locale' => 'en_GB',
             'localeId' => '13604ec993beefcdaba732812cdb828c',
             'domain' => 'messages',
-            'responseContent' => $expectedEnglishXliff,
+            'content' => $expectedEnglishXliff,
             'bag' => $bag,
         ];
 
@@ -955,43 +939,46 @@ XLIFF;
             'locale' => 'de',
             'localeId' => '5fea6ed5c21767730918a9400e420832',
             'domain' => 'validators',
-            'responseContent' => $expectedGermanXliff,
+            'content' => $expectedGermanXliff,
             'bag' => $bag,
         ];
     }
 
-    public function toStringProvider(): \Generator
+    public static function toStringProvider(): \Generator
     {
         yield 'default endpoint' => [
-            'provider' => $this->createProvider(httpClient: $this->getHttpClient()->withOptions([
+            'providerOptions' => [
                 'base_uri' => 'https://api.phrase.com/api/v2/projects/PROJECT_ID/',
                 'headers' => [
                     'Authorization' => 'token API_TOKEN',
                     'User-Agent' => 'myProject',
                 ],
-            ])),
+            ],
+            'endpoint' => null,
             'expected' => 'phrase://api.phrase.com',
         ];
 
         yield 'custom endpoint' => [
-            'provider' => $this->createProvider(httpClient: $this->getHttpClient()->withOptions([
+            'providerOptions' => [
                 'base_uri' => 'https://api.us.app.phrase.com/api/v2/projects/PROJECT_ID/',
                 'headers' => [
                     'Authorization' => 'token API_TOKEN',
                     'User-Agent' => 'myProject',
                 ],
-            ]), endpoint: 'api.us.app.phrase.com'),
+            ],
+            'endpoint' => 'api.us.app.phrase.com',
             'expected' => 'phrase://api.us.app.phrase.com',
         ];
 
         yield 'custom endpoint with port' => [
-            'provider' => $this->createProvider(httpClient: $this->getHttpClient()->withOptions([
+            'providerOptions' => [
                 'base_uri' => 'https://api.us.app.phrase.com:8080/api/v2/projects/PROJECT_ID/',
                 'headers' => [
                     'Authorization' => 'token API_TOKEN',
                     'User-Agent' => 'myProject',
                 ],
-            ]), endpoint: 'api.us.app.phrase.com:8080'),
+            ],
+            'endpoint' => 'api.us.app.phrase.com:8080',
             'expected' => 'phrase://api.us.app.phrase.com:8080',
         ];
     }
@@ -1079,9 +1066,9 @@ XLIFF;
 
         yield [
             'locale' => 'en_GB',
-            'locale_id' => '13604ec993beefcdaba732812cdb828c',
+            'localeId' => '13604ec993beefcdaba732812cdb828c',
             'domain' => 'messages',
-            'content' => <<<'XLIFF'
+            'responseContent' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="global" datatype="plaintext" source-language="de" target-language="en-GB">
@@ -1099,7 +1086,7 @@ XLIFF;
   </file>
 </xliff>
 XLIFF,
-            'expected bag' => $bag,
+            'expectedTranslatorBag' => $bag,
         ];
 
         $bag = new TranslatorBag();
@@ -1127,9 +1114,9 @@ XLIFF,
 
         yield [
             'locale' => 'de',
-            'locale_id' => '5fea6ed5c21767730918a9400e420832',
+            'localeId' => '5fea6ed5c21767730918a9400e420832',
             'domain' => 'validators',
-            'content' => <<<'XLIFF'
+            'responseContent' => <<<'XLIFF'
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="file.ext" datatype="plaintext" source-language="de" target-language="de">
@@ -1147,30 +1134,30 @@ XLIFF,
   </file>
 </xliff>
 XLIFF,
-            'expected bag' => $bag,
+            'expectedTranslatorBag' => $bag,
         ];
     }
 
     /**
-     * @return array<string, ExceptionDefinition>
+     * @return array<array-key, ExceptionDefinition>
      */
     private static function getExceptionResponses(string $exceptionMessage, string $loggerMessage, int $statusCode = 400): array
     {
         return [
             'bad request' => [
                 'statusCode' => $statusCode,
-                'exceptionMessage' => $exceptionMessage,
-                'loggerMessage' => $loggerMessage,
+                'expectedExceptionMessage' => $exceptionMessage,
+                'expectedLoggerMessage' => $loggerMessage,
             ],
             'rate limit exceeded' => [
                 'statusCode' => 429,
-                'exceptionMessage' => 'Rate limit exceeded (1000). please wait 60 seconds.',
-                'loggerMessage' => $loggerMessage,
+                'expectedExceptionMessage' => 'Rate limit exceeded (1000). please wait 60 seconds.',
+                'expectedLoggerMessage' => $loggerMessage,
             ],
             'server unavailable' => [
                 'statusCode' => 503,
-                'exceptionMessage' => 'Provider server error.',
-                'loggerMessage' => $loggerMessage,
+                'expectedExceptionMessage' => 'Provider server error.',
+                'expectedLoggerMessage' => $loggerMessage,
             ],
         ];
     }
