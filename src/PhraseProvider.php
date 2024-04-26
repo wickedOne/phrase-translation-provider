@@ -180,6 +180,8 @@ class PhraseProvider implements ProviderInterface
         $names = array_map(static fn ($v): ?string => preg_replace('/([\s:,])/', '\\\\\\\\$1', $v), $keys);
 
         foreach ($names as $name) {
+            \assert(\is_string($name));
+
             $response = $this->httpClient->request('DELETE', 'keys', [
                 'query' => [
                     'q' => 'name:' . $name,

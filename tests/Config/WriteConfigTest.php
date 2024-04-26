@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\Translation\Bridge\Phrase\Tests\Config;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\Bridge\Phrase\Config\WriteConfig;
 use Symfony\Component\Translation\Provider\Dsn;
@@ -24,10 +25,9 @@ use Symfony\Component\Translation\Provider\Dsn;
 class WriteConfigTest extends TestCase
 {
     /**
-     * @dataProvider dsnOptionsProvider
-     *
      * @param PhraseWriteConfig $expectedOptions
      */
+    #[DataProvider('dsnOptionsProvider')]
     public function testCreateFromDsn(string $dsn, array $expectedOptions): void
     {
         $config = WriteConfig::fromDsn(new Dsn($dsn));
@@ -74,7 +74,7 @@ class WriteConfigTest extends TestCase
     {
         yield 'default options' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject',
-            'expected_options' => [
+            'expectedOptions' => [
                 'file_format' => 'symfony_xliff',
                 'update_translations' => '1',
             ],
@@ -82,7 +82,7 @@ class WriteConfigTest extends TestCase
 
         yield 'overwrite non protected options' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject&write[update_translations]=0',
-            'expected_options' => [
+            'expectedOptions' => [
                 'file_format' => 'symfony_xliff',
                 'update_translations' => '0',
             ],
@@ -90,7 +90,7 @@ class WriteConfigTest extends TestCase
 
         yield 'every single option' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?write%5Bupdate_translations%5D=1&write%5Bupdate_descriptions%5D=0&write%5Bskip_upload_tags%5D=1&write%5Bskip_unverification%5D=0&write%5Bfile_encoding%5D=UTF-8&write%5Blocale_mapping%5D%5Ben%5D=2&write%5Bformat_options%5D%5Bfoo%5D=bar&write%5Bautotranslate%5D=1&write%5Bmark_reviewed%5D=1',
-            'expected_options' => [
+            'expectedOptions' => [
                 'file_format' => 'symfony_xliff',
                 'update_translations' => '1',
                 'update_descriptions' => '0',
@@ -106,7 +106,7 @@ class WriteConfigTest extends TestCase
 
         yield 'overwrite protected options' => [
             'dsn' => 'phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject&write[file_format]=yaml',
-            'expected_options' => [
+            'expectedOptions' => [
                 'file_format' => 'symfony_xliff',
                 'update_translations' => '1',
             ],
