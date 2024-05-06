@@ -3827,12 +3827,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "ddcd0a72eec2dd32a4a4bb719a95201f753f12e8"
+                "reference": "b88a8ff62ebab83b7c8fccae8984fba26d42ed4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/ddcd0a72eec2dd32a4a4bb719a95201f753f12e8",
-                "reference": "ddcd0a72eec2dd32a4a4bb719a95201f753f12e8",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/b88a8ff62ebab83b7c8fccae8984fba26d42ed4e",
+                "reference": "b88a8ff62ebab83b7c8fccae8984fba26d42ed4e",
                 "shasum": ""
             },
             "conflict": {
@@ -4046,7 +4046,7 @@
                 "getkirby/panel": "<2.5.14",
                 "getkirby/starterkit": "<=3.7.0.2",
                 "gilacms/gila": "<=1.15.4",
-                "gleez/cms": "<=1.2|==2",
+                "gleez/cms": "<=1.3|==2",
                 "globalpayments/php-sdk": "<2",
                 "gogentooss/samlbase": "<1.2.7",
                 "google/protobuf": "<3.15",
@@ -4611,7 +4611,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-05-03T21:04:13+00:00"
+            "time": "2024-05-05T05:04:28+00:00"
         },
         {
             "name": "sanmai/later",
@@ -6453,12 +6453,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "08afc45a81d1f7c5145341ddf4c3c2c8b1985ed2"
+                "reference": "16b24bdc94e052b5ce69fd232a77416a1f6ec3e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/08afc45a81d1f7c5145341ddf4c3c2c8b1985ed2",
-                "reference": "08afc45a81d1f7c5145341ddf4c3c2c8b1985ed2",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/16b24bdc94e052b5ce69fd232a77416a1f6ec3e6",
+                "reference": "16b24bdc94e052b5ce69fd232a77416a1f6ec3e6",
                 "shasum": ""
             },
             "require": {
@@ -6554,7 +6554,7 @@
                 "issues": "https://github.com/vimeo/psalm/issues",
                 "source": "https://github.com/vimeo/psalm"
             },
-            "time": "2024-04-11T20:02:02+00:00"
+            "time": "2024-05-05T16:11:12+00:00"
         },
         {
             "name": "webmozart/assert",
