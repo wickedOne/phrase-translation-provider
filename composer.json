@@ -32,7 +32,7 @@
     "require-dev": {
         "infection/infection": "^0.29",
         "phpstan/phpstan": "^1.11.2",
-        "phpstan/phpstan-deprecation-rules": "^1.2.0",
+        "phpstan/phpstan-deprecation-rules": "^2.0.0",
         "phpstan/phpstan-php-parser": "^1.1",
         "phpstan/phpstan-phpunit": "^1.4.0",
         "phpunit/phpunit": "^11.1.3",
