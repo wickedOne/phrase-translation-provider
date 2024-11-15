@@ -1,11 +1,9 @@
 includes:
-    - vendor/phpstan/phpstan-php-parser/extension.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon
     - vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-    checkGenericClassInNonGenericObjectType: false
     editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
     level: 8
     paths:

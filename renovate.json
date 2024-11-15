@@ -3,5 +3,5 @@
   "extends": [
     "local>wickedOne/.github:renovate-config"
   ],
-  "rangeStrategy": "widen"
+  "rangeStrategy": "in-range-only"
 }
