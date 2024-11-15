@@ -64,7 +64,7 @@ class ReadConfig
      */
     final private function __construct(
         private array $options,
-        private readonly bool $fallbackEnabled
+        private readonly bool $fallbackEnabled,
     ) {
     }
 

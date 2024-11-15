@@ -64,7 +64,7 @@ class PhraseProvider implements ProviderInterface
 
     public function __toString(): string
     {
-        return sprintf('phrase://%s', $this->endpoint);
+        return \sprintf('phrase://%s', $this->endpoint);
     }
 
     /**
@@ -100,7 +100,7 @@ class PhraseProvider implements ProviderInterface
                 ]);
 
                 if (200 !== ($statusCode = $response->getStatusCode()) && 304 !== $statusCode) {
-                    $this->logger->error(sprintf('Unable to get translations for locale "%s" from phrase: "%s".', $locale, $response->getContent(false)));
+                    $this->logger->error(\sprintf('Unable to get translations for locale "%s" from phrase: "%s".', $locale, $response->getContent(false)));
 
                     $this->throwProviderException($statusCode, $response, 'Unable to get translations from phrase.');
                 }
@@ -143,7 +143,7 @@ class PhraseProvider implements ProviderInterface
                 $phraseLocale = $this->getLocale($catalogue->getLocale());
 
                 $content = $this->xliffFileDumper->formatCatalogue($catalogue, $domain, ['default_locale' => $this->defaultLocale]);
-                $filename = sprintf('%d-%s-%s.xlf', date('YmdHis'), $domain, $catalogue->getLocale());
+                $filename = \sprintf('%d-%s-%s.xlf', date('YmdHis'), $domain, $catalogue->getLocale());
 
                 $fields = array_merge($this->writeConfig->withTag($domain)->withLocale($phraseLocale)->getOptions(), ['file' => new DataPart($content, $filename, 'application/xml')]);
 
@@ -155,7 +155,7 @@ class PhraseProvider implements ProviderInterface
                 ]);
 
                 if (201 !== $statusCode = $response->getStatusCode()) {
-                    $this->logger->error(sprintf('Unable to upload translations for domain "%s" to phrase: "%s".', $domain, $response->getContent(false)));
+                    $this->logger->error(\sprintf('Unable to upload translations for domain "%s" to phrase: "%s".', $domain, $response->getContent(false)));
 
                     $this->throwProviderException($statusCode, $response, 'Unable to upload translations to phrase.');
                 }
@@ -189,7 +189,7 @@ class PhraseProvider implements ProviderInterface
             ]);
 
             if (200 !== $statusCode = $response->getStatusCode()) {
-                $this->logger->error(sprintf('Unable to delete key "%s" in phrase: "%s".', $name, $response->getContent(false)));
+                $this->logger->error(\sprintf('Unable to delete key "%s" in phrase: "%s".', $name, $response->getContent(false)));
 
                 $this->throwProviderException($statusCode, $response, 'Unable to delete key in phrase.');
             }
@@ -217,7 +217,7 @@ class PhraseProvider implements ProviderInterface
     {
         array_multisort($options);
 
-        return sprintf('%s.%s.%s', $locale, $domain, sha1(serialize($options)));
+        return \sprintf('%s.%s.%s', $locale, $domain, sha1(serialize($options)));
     }
 
     private function getLocale(string $locale): string
@@ -256,7 +256,7 @@ class PhraseProvider implements ProviderInterface
         ]);
 
         if (201 !== $statusCode = $response->getStatusCode()) {
-            $this->logger->error(sprintf('Unable to create locale "%s" in phrase: "%s".', $locale, $response->getContent(false)));
+            $this->logger->error(\sprintf('Unable to create locale "%s" in phrase: "%s".', $locale, $response->getContent(false)));
 
             $this->throwProviderException($statusCode, $response, 'Unable to create locale phrase.');
         }
@@ -280,7 +280,7 @@ class PhraseProvider implements ProviderInterface
             ]);
 
             if (200 !== $statusCode = $response->getStatusCode()) {
-                $this->logger->error(sprintf('Unable to get locales from phrase: "%s".', $response->getContent(false)));
+                $this->logger->error(\sprintf('Unable to get locales from phrase: "%s".', $response->getContent(false)));
 
                 $this->throwProviderException($statusCode, $response, 'Unable to get locales from phrase.');
             }
@@ -302,7 +302,7 @@ class PhraseProvider implements ProviderInterface
         $headers = $response->getHeaders(false);
 
         throw match (true) {
-            429 === $statusCode => new ProviderException(sprintf('Rate limit exceeded (%s). please wait %s seconds.',
+            429 === $statusCode => new ProviderException(\sprintf('Rate limit exceeded (%s). please wait %s seconds.',
                 $headers['x-rate-limit-limit'][0],
                 $headers['x-rate-limit-reset'][0]
             ), $response),
