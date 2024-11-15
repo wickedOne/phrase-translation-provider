@@ -3,5 +3,5 @@
   "extends": [
     "local>wickedOne/.github:renovate-config"
   ],
-  "rangeStrategy": "in-range-only"
+  "rangeStrategy": "update-lockfile"
 }
