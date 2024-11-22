@@ -4,7 +4,6 @@ symfony phrase translation provider bridge
 
 [![infection](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2FwickedOne%2Fphrase-translation-provider%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/wickedOne/phrase-translation-provider/master)
 [![codecov](https://codecov.io/gh/wickedOne/phrase-translation-provider/branch/master/graph/badge.svg?token=UHKAVGURP7)](https://codecov.io/gh/wickedOne/phrase-translation-provider)
-[![psalm](https://shepherd.dev/github/wickedOne/phrase-translation-provider/coverage.svg)](https://shepherd.dev/github/wickedOne/phrase-translation-provider)
 [![stable](http://poser.pugx.org/wickedone/phrase-translation-provider/v)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 [![downloads](http://poser.pugx.org/wickedone/phrase-translation-provider/downloads)](https://packagist.org/packages/wickedone/phrase-translation-provider)
 [![license](http://poser.pugx.org/wickedone/phrase-translation-provider/license)](https://packagist.org/packages/wickedone/phrase-translation-provider)
