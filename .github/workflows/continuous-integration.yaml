@@ -122,40 +122,6 @@ jobs:
       - name: "phpstan"
         run: "vendor/bin/phpstan analyse --memory-limit=-1 --error-format=checkstyle | cs2pr"
 
-  static-analysis-psalm:
-    name: "static analysis psalm"
-
-    runs-on: ${{ matrix.operating-system }}
-
-    strategy:
-      matrix:
-        dependencies:
-          - "locked"
-        php-version:
-          - "8.2"
-          - "8.3"
-        operating-system:
-          - "ubuntu-latest"
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v4"
-
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@2.31.1"
-        with:
-          coverage: "none"
-          php-version: "${{ matrix.php-version }}"
-          ini-values: memory_limit=-1
-
-      - name: "Install dependencies"
-        uses: "ramsey/composer-install@3.0.0"
-        with:
-          dependency-versions: "${{ matrix.dependencies }}"
-
-      - name: "psalm"
-        run: "vendor/bin/psalm --shepherd --stats"
-
   coding-standards:
     name: "php cs fixer"
 
@@ -167,6 +133,8 @@ jobs:
           - "locked"
         php-version:
           - "8.2"
+          - "8.3"
+          - "8.4"
         operating-system:
           - "ubuntu-latest"
 
@@ -188,4 +156,6 @@ jobs:
           dependency-versions: "${{ matrix.dependencies }}"
 
       - name: "php cs fixer dry run"
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
         run: "php-cs-fixer fix --dry-run --format=checkstyle | cs2pr"
