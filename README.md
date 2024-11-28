@@ -23,7 +23,7 @@ composer require wickedone/phrase-translation-provider
 ```dotenv
 PHRASE_DSN=phrase://PROJECT_ID:API_TOKEN@default?userAgent=myProject
 ```
- 
+
 ### dsn elements
 
 - `PROJECT_ID`: can be retrieved in phrase from `project settings > API > Project ID`
@@ -39,6 +39,7 @@ see [fine tuning your phrase api calls](#fine-tuning-your-phrase-api-calls) for 
 ## service phrase provider
 
 in your `services.yaml` add the following to enable the phrase provider.
+
 ```yaml
 Symfony\Component\Translation\Bridge\Phrase\PhraseProviderFactory:
     tags: ['translation.provider_factory']
@@ -48,7 +49,9 @@ Symfony\Component\Translation\Bridge\Phrase\PhraseProviderFactory:
         $xliffFileDumper: '@translation.dumper.xliff'
         $cache: '@cache.app'
 ```
+
 and in your `translations.yaml` you can add:
+
 ```yaml
 framework:
     translator:
@@ -72,7 +75,7 @@ if you define a locale in your `translation.yaml` which is not configured in you
 ## domains as tags
 
 translations will be tagged in phrase with the symfony translation domain they belong to.
-check the [wickedone/phrase-tag-bundle](https://github.com/wickedOne/phrase-tag-bundle) if you need help managing your tags in phrase 
+check the [wickedone/phrase-tag-bundle](https://github.com/wickedOne/phrase-tag-bundle) if you need help managing your tags in phrase
 
 ## cache
 
@@ -85,7 +88,7 @@ to enable you to perform post-processing on translation values and / or keys, tw
 
 ### PhraseReadEvent
 
-_after_ reading the catalogue from phrase, the resulting `TranslatorBag` is dispatched in a `PhraseReadEvent` prior to being returned from the read method. 
+_after_ reading the catalogue from phrase, the resulting `TranslatorBag` is dispatched in a `PhraseReadEvent` prior to being returned from the read method.
 
 ### PhraseWriteEvent
 
@@ -111,11 +114,11 @@ in order to read translations from phrase the [download locale](https://develope
 | `exclude_empty_zero_forms`        |  bool  |                  |                                                                                     |
 | `include_translated_keys`         |  bool  |                  |                                                                                     |
 | `keep_notranslate_tags`           |  bool  |                  |                                                                                     |
-| `format_options`                  | array  | enclose_in_cdata |                                                                                     |                                                                                     |
-| `encoding`                        | string |                  |                                                                                     |                                                                                     |
-| `skip_unverified_translations`    |  bool  |                  |                                                                                     |                                                                                     |
-| `include_unverified_translations` |  bool  |                  |                                                                                     |                                                                                     |
-| `use_last_reviewed_version`       |  bool  |                  |                                                                                     |                                                                                     |
+| `format_options`                  | array  | enclose_in_cdata |                                                                                     |
+| `encoding`                        | string |                  |                                                                                     |
+| `skip_unverified_translations`    |  bool  |                  |                                                                                     |
+| `include_unverified_translations` |  bool  |                  |                                                                                     |
+| `use_last_reviewed_version`       |  bool  |                  |                                                                                     |
 | `fallback_locale_enabled`         |  bool  |        0         | when the fallback locale is enabled, caching responses from phrase will be disabled |
 
 ### write
