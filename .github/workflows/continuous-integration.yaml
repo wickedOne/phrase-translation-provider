@@ -157,3 +157,16 @@ jobs:
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
         run: "php-cs-fixer fix --dry-run --format=checkstyle | cs2pr"
+
+  markdownlint:
+    runs-on: "ubuntu-latest"
+    name: markdown lint
+
+    steps:
+      - name: "checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "markdown lint"
+        uses: "bewuethr/mdl-action@v1"
+        with:
+          style-file: ".mdl_style.rb"
