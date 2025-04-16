@@ -31,7 +31,7 @@
     },
     "require-dev": {
         "infection/infection": "^0.29",
-        "phpstan/phpstan": "^2.1.11",
+        "phpstan/phpstan": "^2.1.12",
         "phpstan/phpstan-deprecation-rules": "^2.0.1",
         "phpstan/phpstan-phpunit": "^2.0.6",
         "phpunit/phpunit": "^12.1.2",
