@@ -30,7 +30,7 @@
         "symfony/translation": "^5.4 || ^6.4"
     },
     "require-dev": {
-        "infection/infection": "^0.29",
+        "infection/infection": "^0.30",
         "phpstan/phpstan": "^2.1.17",
         "phpstan/phpstan-deprecation-rules": "^2.0.3",
         "phpstan/phpstan-phpunit": "^2.0.6",
