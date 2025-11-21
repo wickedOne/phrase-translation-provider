@@ -21,7 +21,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "~8.3.0 || ~8.4.0",
+        "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
         "psr/cache": "^3.0",
         "psr/event-dispatcher": "^1.0",
         "symfony/event-dispatcher-contracts": "^3.6.0",
