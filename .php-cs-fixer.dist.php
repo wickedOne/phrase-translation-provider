@@ -33,4 +33,5 @@ return (new PhpCsFixer\Config())
         (new PhpCsFixer\Finder())
             ->in([__DIR__ . '/src/', __DIR__ . '/tests/'])
             ->name('*.php')
-    );
+    )
+    ->setUnsupportedPhpVersionAllowed(true);
