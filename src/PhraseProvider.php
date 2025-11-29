@@ -41,7 +41,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  *
  * @author wicliff <wicliff.wolda@gmail.com>
  */
-class PhraseProvider implements ProviderInterface
+class PhraseProvider implements \Stringable, ProviderInterface
 {
     /**
      * @var array<string, PhraseLocale>
