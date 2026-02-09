@@ -34,7 +34,7 @@
         "infection/infection": "^0.32",
         "phpstan/phpstan": "^2.1.38",
         "phpstan/phpstan-deprecation-rules": "^2.0.3",
-        "phpstan/phpstan-phpunit": "^2.0.12",
+        "phpstan/phpstan-phpunit": "^2.0.13",
         "phpunit/phpunit": "^12.5.10",
         "roave/security-advisories": "dev-latest"
     },
