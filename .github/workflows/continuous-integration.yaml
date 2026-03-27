@@ -48,7 +48,7 @@ jobs:
         run: "vendor/bin/phpunit --coverage-clover coverage.xml"
 
       - name: "upload to codecov"
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
 
   mutation-tests:
     name: "mutation tests"
