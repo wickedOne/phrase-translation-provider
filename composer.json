@@ -35,7 +35,7 @@
         "phpstan/phpstan": "^2.1.45",
         "phpstan/phpstan-deprecation-rules": "^2.0.4",
         "phpstan/phpstan-phpunit": "^2.0.16",
-        "phpunit/phpunit": "^13.0.5",
+        "phpunit/phpunit": "^13.0.6",
         "roave/security-advisories": "dev-latest"
     },
     "config": {
