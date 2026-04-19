@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Phrase Symfony Translation Provider.
  * (c) wicliff <wicliff.wolda@gmail.com>
