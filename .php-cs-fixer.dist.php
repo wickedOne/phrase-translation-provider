@@ -28,6 +28,7 @@ return (new PhpCsFixer\Config())
         'strict_param' => true,
         'fopen_flags' => ['b_mode' => true],
         'concat_space' => ['spacing' => 'one'],
+        'declare_strict_types' => true,
     ])
     ->setFinder(
         (new PhpCsFixer\Finder())
