@@ -30,12 +30,12 @@
         "symfony/translation": "^5.4 || ^6.4.34"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.95.4",
+        "friendsofphp/php-cs-fixer": "^3.95.7",
         "infection/infection": "^0.33.2",
-        "phpstan/phpstan": "^2.2.1",
+        "phpstan/phpstan": "^2.2.2",
         "phpstan/phpstan-deprecation-rules": "^2.0.4",
         "phpstan/phpstan-phpunit": "^2.0.16",
-        "phpunit/phpunit": "^13.1.14",
+        "phpunit/phpunit": "^13.2.0",
         "roave/security-advisories": "dev-latest"
     },
     "config": {
