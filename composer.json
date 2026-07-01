@@ -24,18 +24,18 @@
         "php": "~8.4.0 || ~8.5.0",
         "psr/cache": "^3.0",
         "psr/event-dispatcher": "^1.0",
-        "symfony/event-dispatcher-contracts": "^3.7.0",
+        "symfony/event-dispatcher-contracts": "^3.7.1",
         "symfony/http-client": "^5.4 || ^6.4.36",
         "symfony/mime": "^5.4 || ^6.4.36",
         "symfony/translation": "^5.4 || ^6.4.34"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.95.4",
-        "infection/infection": "^0.33.2",
-        "phpstan/phpstan": "^2.2.1",
+        "friendsofphp/php-cs-fixer": "^3.95.11",
+        "infection/infection": "^0.34.0",
+        "phpstan/phpstan": "^2.2.3",
         "phpstan/phpstan-deprecation-rules": "^2.0.4",
-        "phpstan/phpstan-phpunit": "^2.0.16",
-        "phpunit/phpunit": "^13.1.14",
+        "phpstan/phpstan-phpunit": "^2.0.17",
+        "phpunit/phpunit": "^13.2.2",
         "roave/security-advisories": "dev-latest"
     },
     "config": {
