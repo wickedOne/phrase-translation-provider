@@ -410,7 +410,7 @@ class PhraseProviderTest extends TestCase
 
     public function testTranslatorBagAssert(): void
     {
-        $this->expectExceptionMessage('assert($translatorBag instanceof TranslatorBag)');
+        $this->expectExceptionMessageIs('assert($translatorBag instanceof TranslatorBag)');
 
         $trans = $this->createMock(LoggingTranslator::class);
         $provider = $this->createProvider();
@@ -450,7 +450,7 @@ class PhraseProviderTest extends TestCase
     {
         $this->expectException(ProviderExceptionInterface::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessageIs($expectedExceptionMessage);
 
         $this->getLogger()
             ->expects(self::once())
@@ -484,7 +484,7 @@ class PhraseProviderTest extends TestCase
     {
         $this->expectException(ProviderExceptionInterface::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessageIs($expectedExceptionMessage);
 
         $this->getLogger()
             ->expects(self::once())
@@ -618,7 +618,7 @@ class PhraseProviderTest extends TestCase
     {
         $this->expectException(ProviderExceptionInterface::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessageIs($expectedExceptionMessage);
 
         $this->getLogger()
             ->expects(self::once())
@@ -703,7 +703,7 @@ class PhraseProviderTest extends TestCase
     {
         $this->expectException(ProviderExceptionInterface::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessageIs($expectedExceptionMessage);
 
         $this->getLogger()
             ->expects(self::once())
@@ -822,7 +822,7 @@ class PhraseProviderTest extends TestCase
     {
         $this->expectException(ProviderExceptionInterface::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage($expectedExceptionMessage);
+        $this->expectExceptionMessageIs($expectedExceptionMessage);
 
         $this->getLogger()
             ->expects(self::once())

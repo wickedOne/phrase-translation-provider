@@ -61,7 +61,7 @@ class PhraseProviderFactoryTest extends TestCase
     public function testUnsupportedSchemeException(string $dsn, string $message): void
     {
         $this->expectException(UnsupportedSchemeException::class);
-        $this->expectExceptionMessage($message);
+        $this->expectExceptionMessageIs($message);
 
         $dsn = new Dsn($dsn);
 
@@ -73,7 +73,7 @@ class PhraseProviderFactoryTest extends TestCase
     public function testIncompleteDsnException(string $dsn, string $message): void
     {
         $this->expectException(IncompleteDsnException::class);
-        $this->expectExceptionMessage($message);
+        $this->expectExceptionMessageIs($message);
 
         $dsn = new Dsn($dsn);
 
@@ -84,7 +84,7 @@ class PhraseProviderFactoryTest extends TestCase
     public function testRequiredUserAgentOption(): void
     {
         $this->expectException(MissingRequiredOptionException::class);
-        $this->expectExceptionMessage('The option "userAgent" is required but missing.');
+        $this->expectExceptionMessageIs('The option "userAgent" is required but missing.');
 
         $dsn = new Dsn('phrase://PROJECT_ID:API_TOKEN@default');
 
