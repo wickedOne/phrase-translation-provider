@@ -30,9 +30,9 @@
         "symfony/translation": "^5.4 || ^6.4.34"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.95.19",
-        "infection/infection": "^0.35.0",
-        "phpstan/phpstan": "^2.2.8",
+        "friendsofphp/php-cs-fixer": "^3.95.21",
+        "infection/infection": "^0.35.2",
+        "phpstan/phpstan": "^2.2.9",
         "phpstan/phpstan-deprecation-rules": "^2.0.5",
         "phpstan/phpstan-phpunit": "^2.0.18",
         "phpunit/phpunit": "^13.3.1",
