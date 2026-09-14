@@ -2459,16 +2459,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.8.0",
+            "version": "v5.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "044a6a392ff8ad0d61f14370a5fbbd0a0107152f"
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/044a6a392ff8ad0d61f14370a5fbbd0a0107152f",
-                "reference": "044a6a392ff8ad0d61f14370a5fbbd0a0107152f",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9e33da9553fe7786f0962b35f4e4ecf01be89def",
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def",
                 "shasum": ""
             },
             "require": {
@@ -2510,9 +2510,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.8.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.9.0"
             },
-            "time": "2026-07-04T14:30:18+00:00"
+            "time": "2026-09-13T18:51:52+00:00"
         },
         {
             "name": "ondram/ci-detector",
@@ -2885,16 +2885,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "14.3.2",
+            "version": "14.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "93d62632fb675b76c9b941fdcfcfa10ffb9dea75"
+                "reference": "f8640c238e930b914d0098a1edbad6652e61a64a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/93d62632fb675b76c9b941fdcfcfa10ffb9dea75",
-                "reference": "93d62632fb675b76c9b941fdcfcfa10ffb9dea75",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f8640c238e930b914d0098a1edbad6652e61a64a",
+                "reference": "f8640c238e930b914d0098a1edbad6652e61a64a",
                 "shasum": ""
             },
             "require": {
@@ -2913,7 +2913,7 @@
                 "theseer/tokenizer": "^2.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.3.2"
+                "phpunit/phpunit": "^13.3.3"
             },
             "suggest": {
                 "ext-pcov": "PHP extension that provides line coverage",
@@ -2951,7 +2951,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.3.2"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.3.3"
             },
             "funding": [
                 {
@@ -2971,7 +2971,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-04T03:46:43+00:00"
+            "time": "2026-09-10T13:08:32+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -3938,12 +3938,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "3351b8b86dbff4e6abbca303a61d27b65468203a"
+                "reference": "320c728c28346390c380a9876d6572a6c80cdd87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/3351b8b86dbff4e6abbca303a61d27b65468203a",
-                "reference": "3351b8b86dbff4e6abbca303a61d27b65468203a",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/320c728c28346390c380a9876d6572a6c80cdd87",
+                "reference": "320c728c28346390c380a9876d6572a6c80cdd87",
                 "shasum": ""
             },
             "conflict": {
@@ -4673,7 +4673,7 @@
                 "ralffreit/mfa-email": "<1.0.7|==2",
                 "rankmath/seo-by-rank-math": "<=1.0.95",
                 "rap2hpoutre/laravel-log-viewer": "<0.13",
-                "react/http": ">=0.7,<1.9",
+                "react/http": ">=0.6,<1.11.1",
                 "really-simple-plugins/complianz-gdpr": "<6.4.2",
                 "redaxo/source": "<5.21.1",
                 "remdex/livehelperchat": "<4.29",
@@ -4703,7 +4703,7 @@
                 "sheng/yiicms": "<1.2.1",
                 "shlinkio/shlink": "<=5.0.1",
                 "shopper/cart": "<2.8",
-                "shopper/framework": "<2.8",
+                "shopper/framework": "<2.9.2",
                 "shopware/core": "<6.6.10.18-dev|>=6.7,<6.7.10.1-dev",
                 "shopware/platform": "<6.6.10.18-dev|>=6.7,<6.7.10.1-dev",
                 "shopware/production": "<=6.3.5.2",
@@ -5076,7 +5076,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-08T21:35:56+00:00"
+            "time": "2026-09-11T23:00:23+00:00"
         },
         {
             "name": "sanmai/di-container",
